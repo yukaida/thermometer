@@ -8,6 +8,9 @@ import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
@@ -33,6 +36,7 @@ import com.yhao.floatwindow.Screen;
 import com.yhao.floatwindow.ViewStateListener;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -55,10 +59,20 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private SurfaceHolder surfaceHolder;
     private Button buttoncamera;//拍照按钮
     private Camera camera;//摄像头
+
+    private RecyclerView recyclerView;
+
     TextView tvTemp;//温度
     KqwSpeechSynthesizer mKqwSpeechSynthesizer;
     ConstraintLayout constraintLayout;
 
+    MyRvAdapter myRvAdapter;
+
+    TextView tvSp;
+    int portPosition = 0;
+    Button button_exit;
+    public static MainActivity sMainActivity;
+    ArrayList<Device> devices;
     Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -92,17 +106,44 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         setContentView(R.layout.activity_main);
 
         SerialPortFinder serialPortFinder = new SerialPortFinder();
-        ArrayList<Device> devices = serialPortFinder.getDevices();
+        devices = serialPortFinder.getDevices();
 
         imageView = new ImageView(getApplicationContext());
         imageView.setImageResource(R.drawable.ic_launcher_background);
 
+        tvSp = findViewById(R.id.textView_sp);
+        tvSp.setText("串口：默认"+devices.get(0).getName());
+        button_exit = findViewById(R.id.button_exit);
+        button_exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != timerTask) {
+                    timerTask.cancel();
+                }
+                if (null != timer) {
+                    timer.cancel();
+                }
+                mSerialPortManager.closeSerialPort();
+                finish();
+            }
+        });
 
+
+        sMainActivity = this;
+
+        recyclerView = findViewById(R.id.sp_rv);
+
+        final ArrayList<String> spName = new ArrayList<>();
+        for (Device device : devices) {
+            spName.add(device.getName());
+        }
+        myRvAdapter = new MyRvAdapter(spName);
+        recyclerView.setAdapter(myRvAdapter);
+        recyclerView.setLayoutManager(new GridLayoutManager(this,3));
 
         SpeechUtility.createUtility(this, SpeechConstant.APPID +"=5ec5e6f6");
 
         mKqwSpeechSynthesizer = new KqwSpeechSynthesizer(this);
-
 
         surfaceView = new SurfaceView(getApplicationContext());
         surfaceHolder = surfaceView.getHolder();
@@ -120,9 +161,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //        tvTemp.setLayoutParams();
 
         constraintLayout.addView(tvTemp);
-
-
-
+        
         FloatWindow
                 .with(getApplicationContext())
                 .setView(constraintLayout)
@@ -137,12 +176,32 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 .setTag("camera")
                 .setMoveStyle(500, new AccelerateInterpolator())  //贴边动画时长为500ms，加速插值器
                 .build();
-
+        
 
         button = findViewById(R.id.button_readtemp);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                String sp=tvSp.getText().toString();
+
+//        打开串口
+//        参数1：串口
+//        参数2：波特率
+//        返回：串口打开是否成功
+                if (button.getText().equals("开始读取温度")) {
+                    boolean openSerialPort = mSerialPortManager.openSerialPort(devices.get(portPosition).getFile(), 115200);
+                    Log.d(TAG, "onCreate: SerialPort open :--" + devices.get(4) + "--succeed ? " + openSerialPort);
+                    if (!openSerialPort) {
+                        Toast.makeText(MainActivity.this, "串口打开失败,请切换串口或检查设备", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Toast.makeText(MainActivity.this, "打开成功,开始读取温度", Toast.LENGTH_SHORT).show();
+
+                }
+                
+                
+
                 if (readTemp) {
                     readTemp = false;
                     button.setText("继续");
@@ -203,13 +262,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 Log.d(TAG, "onDataSent: " + DataConversion.encodeHexString(bytes));
             }
         });
-
-//        打开串口
-//        参数1：串口
-//        参数2：波特率
-//        返回：串口打开是否成功
-        boolean openSerialPort = mSerialPortManager.openSerialPort(devices.get(4).getFile(), 115200);
-        Log.d(TAG, "onCreate: SerialPort open :--" + devices.get(4) + "--succeed ? " + openSerialPort);
 
 //        发送数据
 //        参数：发送数据 byte[]
