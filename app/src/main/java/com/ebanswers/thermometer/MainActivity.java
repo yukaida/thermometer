@@ -1,9 +1,9 @@
 package com.ebanswers.thermometer;
 
+import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechUtility;
 import com.kongqw.serialportlibrary.Device;
 import com.kongqw.serialportlibrary.SerialPortFinder;
 import com.kongqw.serialportlibrary.SerialPortManager;
@@ -32,12 +34,12 @@ import com.yhao.floatwindow.ViewStateListener;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import utils.DataConversion;
 import utils.HexUtils;
+import utils.KqwSpeechSynthesizer;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = "MainActivity";
@@ -48,14 +50,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     TimerTask timerTask;
     boolean atCDboolean = false;
     ImageView imageView;
-
+    private SharedPreferences mSharedPreferences;
     private SurfaceView surfaceView;//预览摄像头
     private SurfaceHolder surfaceHolder;
     private Button buttoncamera;//拍照按钮
     private Camera camera;//摄像头
     TextView tvTemp;//温度
-
-    View view;
+    KqwSpeechSynthesizer mKqwSpeechSynthesizer;
     ConstraintLayout constraintLayout;
 
     Handler handler = new Handler() {
@@ -64,9 +65,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             switch (msg.what) {
                 case 0://显示
                     FloatWindow.get("camera").show();
+                    mKqwSpeechSynthesizer.start("摄像头开启");
                     break;
                 case 1://隐藏
                     FloatWindow.get("camera").hide();
+
                     break;
                 case 2://修改位置
                     FloatWindow.get("camera").updateX(500);
@@ -75,7 +78,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
     };
 
-    TextToSpeech mSpeech;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mKqwSpeechSynthesizer.stop();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,44 +97,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         imageView = new ImageView(getApplicationContext());
         imageView.setImageResource(R.drawable.ic_launcher_background);
 
-     
-
-//        mSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-//            @Override
-//            public void onInit(int status) {
-//                if (status == TextToSpeech.SUCCESS) {
-//                    int result = mSpeech.setLanguage(Locale.CHINESE);//设置语言
-//                    if (result != TextToSpeech.LANG_COUNTRY_AVAILABLE
-//                            && result != TextToSpeech.LANG_AVAILABLE) {
-//                        Toast.makeText(MainActivity.this, "TTS暂时不支持这种语音的朗读！",
-//                                Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }
-//        });
-
-//        //speech按钮监听事件
-//        speech.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                //播放
-
-//            }
-//        });
-
-//        mSpeech = new TextToSpeech(MainActivity.this, new TTSListener());
-//        SharedData.languageList.put("中文", Locale.CHINESE);
-//        mSpeech.setLanguage(SharedData.languageList.get("中文"));
-//        mSpeech.setSpeechRate(SharedData.voice_speed);
-//        mSpeech.setPitch(SharedData.voice_pitch);
 
 
-//        popLayout = findViewById(R.id.poplayout);
-//        popLayout = new ConstraintLayout(this);
+        SpeechUtility.createUtility(this, SpeechConstant.APPID +"=5ec5e6f6");
 
-//        surfaceView =  findViewById(R.id.surfaceView);
-//        surfaceHolder = surfaceView.getHolder();
-//        surfaceHolder.addCallback(this);
+        mKqwSpeechSynthesizer = new KqwSpeechSynthesizer(this);
 
 
         surfaceView = new SurfaceView(getApplicationContext());
@@ -163,16 +138,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 .setMoveStyle(500, new AccelerateInterpolator())  //贴边动画时长为500ms，加速插值器
                 .build();
 
-//        surfaceView =  findViewById(R.id.surfaceView);
-//        surfaceHolder = surfaceView.getHolder();
-//        surfaceHolder.addCallback(this);
 
         button = findViewById(R.id.button_readtemp);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
-//                Log.d(TAG, "onClick: send succeed?"+sendBytes);
                 if (readTemp) {
                     readTemp = false;
                     button.setText("继续");
