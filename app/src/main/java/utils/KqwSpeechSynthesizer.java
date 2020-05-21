@@ -131,7 +131,7 @@ public class KqwSpeechSynthesizer {
         mTts.setParameter(SpeechConstant.PITCH, "50");
 
         // 设置音量
-        mTts.setParameter(SpeechConstant.VOLUME, "90");
+        mTts.setParameter(SpeechConstant.VOLUME, "50");
 
         // 设置播放器音频流类型
         mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");

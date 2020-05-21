@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     boolean readTemp = false;
     Timer timer;
     TimerTask timerTask;
-    boolean atCDboolean = false;
+    boolean atCDboolean = true;
     ImageView imageView;
     private SharedPreferences mSharedPreferences;
     private SurfaceView surfaceView;//预览摄像头
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             switch (msg.what) {
                 case 0://显示
                     FloatWindow.get("camera").show();
-                    mKqwSpeechSynthesizer.start("摄像头开启");
+
                     break;
                 case 1://隐藏
                     FloatWindow.get("camera").hide();
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                             boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
                         }
                     };
-                    timer.schedule(timerTask, 0, 500);
+                    timer.schedule(timerTask, 0, 1000);
                 } else {
                     if (null != timerTask) {
                         timerTask.cancel();
@@ -246,39 +246,43 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     private void analysisTemp(final double temp) {
         if (35 < temp && temp < 40) {
-            if (atCD()) {
+            if (atCDboolean) {
                 //语言播报/打开摄像头/显示温度
+                atCDboolean = false;
                 showCamera();
 //                int i=mSpeech.speak(temp+"度"+"体温正常",TextToSpeech.QUEUE_ADD, null);
-
-
+                if (35 < temp && temp < 37.3) {
+                    mKqwSpeechSynthesizer.start(temp + "度" + "体温正常");
+                } else {
+                    mKqwSpeechSynthesizer.start(temp + "度" + "体温异常");
+                }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         tvTemp.setText(temp+"℃");
                     }
                 });
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        //要执行的操作
+                        atCDboolean = true;
+                        Message messagehide = new Message();
+                        messagehide.what = 1;
+                        handler.sendMessage(messagehide);
+                    }
+                }, 5000);//5秒后执行Runnable中的run方法
             }
         }
     }
 
     private boolean atCD() {
         if (atCDboolean) {
+            atCDboolean = false;
             return atCDboolean;
         } else {
             atCDboolean = true;
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //要执行的操作
-                    atCDboolean = false;
 
-                    Message messagehide = new Message();
-                    messagehide.what = 1;
-                    handler.sendMessage(messagehide);
-
-                }
-            }, 5000);//5秒后执行Runnable中的run方法
             return atCDboolean;
         }
     }
