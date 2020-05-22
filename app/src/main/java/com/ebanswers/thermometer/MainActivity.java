@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     };
 
     int SerialPort = 0;//串口
-    int Baud = 115200;//波特率
+    int Baud = 9600;//波特率
     boolean cameraOpen = true;//摄像头
     boolean temperatureShow = true;//温度
     boolean voiceOpen = true;//语音播报
@@ -440,7 +440,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         if (!SPUtils.contains(this, "SerialPort")) {
             SPUtils.put(this, "SerialPort", 0);//串口 position
-            SPUtils.put(this, "Baud", 115200);//波特率 默认9600
+            SPUtils.put(this, "Baud", 9600);//波特率 默认9600
             SPUtils.put(this, "camera", true);//摄像头 默认开启
             SPUtils.put(this, "temperature", true);//温度 默认显示
             SPUtils.put(this, "voice", true);//语音播报 默认开启

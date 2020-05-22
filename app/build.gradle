@@ -30,6 +30,21 @@ android {
         }
     }
 
+    signingConfigs {
+        debug_config {
+            keyAlias 'kitchen diary'
+            keyPassword '53iqkitchen'
+            storeFile file('../sign/kitchen_diary.jks')
+            storePassword '53iqkitchen'
+        }
+        release_config {
+            keyAlias 'kitchen diary'
+            keyPassword '53iqkitchen'
+            storeFile file('../sign/kitchen_diary.jks')
+            storePassword '53iqkitchen'
+        }
+    }
+
 }
 
 dependencies {
