@@ -29,7 +29,7 @@ public class MyRvAdapter extends RecyclerView.Adapter<MyRvAdapter.MyHoler> {
             @Override
             public void onClick(View v) {
                 MainActivity.sMainActivity.tvSp.setText("串口："+spList.get(holder.getAdapterPosition()));
-                MainActivity.sMainActivity.portPosition = holder.getAdapterPosition();
+                MainActivity.sMainActivity.SerialPort = holder.getAdapterPosition();
             }
         });
 

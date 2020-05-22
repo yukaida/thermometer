@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.FontsContract;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,12 +40,15 @@ import com.yhao.floatwindow.ViewStateListener;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import utils.DataConversion;
 import utils.HexUtils;
 import utils.KqwSpeechSynthesizer;
+import utils.SPUtils;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = "MainActivity";
@@ -69,8 +74,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     MyRvAdapter myRvAdapter;
 
     TextView tvSp;
-    int portPosition = 0;
     Button button_exit;
+
+    Button button_camera;
+    Button button_temp;
+    Button button_voice;
+    Button button_save;
+
+    EditText editText_portspeed;
+
+
     public static MainActivity sMainActivity;
     ArrayList<Device> devices;
     Handler handler = new Handler() {
@@ -92,6 +105,30 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
     };
 
+    int SerialPort = 0;//串口
+    int Baud = 9600;//波特率
+    boolean cameraOpen = true;//摄像头
+    boolean temperatureShow = true;//温度
+    boolean voiceOpen = true;//语音播报
+
+//    @Override
+//    public void onClick(View v) {
+//        switch (v.getId()) {
+////            case R.id.button_camera:
+////
+////                break;
+////            case R.id.button_temp:
+////
+////                break;
+////            case R.id.button_speak:
+////
+////                break;
+////            case R.id.button_save:
+////
+////                break;
+//
+//        }
+//    }
 
     @Override
     protected void onDestroy() {
@@ -105,6 +142,57 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
+
+
+        button_exit = findViewById(R.id.button_exit);
+
+        button_camera = findViewById(R.id.button_camera);
+        button_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cameraOpen) {
+                    button_camera.setText("摄像头：关闭");
+                } else {
+                    button_camera.setText("摄像头：开启");
+                }
+                cameraOpen = cameraOpen ? false : true;
+                SPUtils.put(MainActivity.this, "camera", cameraOpen);//摄像头
+            }
+        });
+
+        button_temp = findViewById(R.id.button_temp);
+        button_temp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (temperatureShow) {
+                    button_temp.setText("温度：隐藏");
+                } else {
+                    button_temp.setText("温度：显示");
+                }
+                temperatureShow = temperatureShow ? false : true;
+                SPUtils.put(MainActivity.this, "temperature", temperatureShow );//温度
+            }
+        });
+
+
+        button_voice = findViewById(R.id.button_speak);
+        button_voice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (voiceOpen) {
+                    button_voice.setText("语音播报：关闭");
+                } else {
+                    button_voice.setText("语音播报：开启");
+                }
+                voiceOpen = voiceOpen ? false : true;
+                SPUtils.put(MainActivity.this, "voice", voiceOpen );//语音
+            }
+        });
+
+        editText_portspeed = findViewById(R.id.editText_portspeed);
+
         SerialPortFinder serialPortFinder = new SerialPortFinder();
         devices = serialPortFinder.getDevices();
 
@@ -112,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         imageView.setImageResource(R.drawable.ic_launcher_background);
 
         tvSp = findViewById(R.id.textView_sp);
-        tvSp.setText("串口：默认"+devices.get(0).getName());
+        tvSp.setText("串口：" + devices.get(SerialPort).getName());
         button_exit = findViewById(R.id.button_exit);
         button_exit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,29 +227,29 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
         myRvAdapter = new MyRvAdapter(spName);
         recyclerView.setAdapter(myRvAdapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(this,3));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
-        SpeechUtility.createUtility(this, SpeechConstant.APPID +"=5ec5e6f6");
+        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=5ec5e6f6");
 
-        mKqwSpeechSynthesizer = new KqwSpeechSynthesizer(this);
+        mKqwSpeechSynthesizer = new KqwSpeechSynthesizer(this);//语音引擎初始化
 
         surfaceView = new SurfaceView(getApplicationContext());
         surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(this);
+        surfaceHolder.addCallback(this);//摄像头帧容器初始化
 
         constraintLayout = (ConstraintLayout) LayoutInflater.from(this).inflate(R.layout.window_float, null);
 //        view.
-        constraintLayout.addView(surfaceView);
+        constraintLayout.addView(surfaceView);//悬浮窗view初始化
 
         tvTemp = new TextView(getApplicationContext());
         tvTemp.setText("");
         tvTemp.setTextColor(getResources().getColor(R.color.colortemp));
-        tvTemp.setTextSize(50);
+        tvTemp.setTextSize(50);//悬浮窗温度初始化
 
 //        tvTemp.setLayoutParams();
 
         constraintLayout.addView(tvTemp);
-        
+
         FloatWindow
                 .with(getApplicationContext())
                 .setView(constraintLayout)
@@ -175,32 +263,28 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 .setMoveType(MoveType.active)
                 .setTag("camera")
                 .setMoveStyle(500, new AccelerateInterpolator())  //贴边动画时长为500ms，加速插值器
-                .build();
-        
+                .build();//悬浮窗对象实例化
 
-        button = findViewById(R.id.button_readtemp);
+
+        button = findViewById(R.id.button_readtemp);//开始读取温度按钮
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String sp=tvSp.getText().toString();
 
 //        打开串口
 //        参数1：串口
 //        参数2：波特率
 //        返回：串口打开是否成功
                 if (button.getText().equals("开始读取温度")) {
-                    boolean openSerialPort = mSerialPortManager.openSerialPort(devices.get(portPosition).getFile(), 115200);
-                    Log.d(TAG, "onCreate: SerialPort open :--" + devices.get(4) + "--succeed ? " + openSerialPort);
+                    boolean openSerialPort = mSerialPortManager.openSerialPort(devices.get(SerialPort).getFile(), 115200);
+                    Log.d(TAG, "onCreate: SerialPort open :--" + devices.get(SerialPort).getName() + "--succeed ? " + openSerialPort);
                     if (!openSerialPort) {
                         Toast.makeText(MainActivity.this, "串口打开失败,请切换串口或检查设备", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     Toast.makeText(MainActivity.this, "打开成功,开始读取温度", Toast.LENGTH_SHORT).show();
-
                 }
-                
-                
+
 
                 if (readTemp) {
                     readTemp = false;
@@ -269,7 +353,46 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //        boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
         Message messagehide = new Message();
         messagehide.what = 1;
-        handler.sendMessage(messagehide);
+        handler.sendMessage(messagehide);//隐藏悬浮窗
+
+        if (!SPUtils.contains(this, "SerialPort")) {
+            SPUtils.put(this, "SerialPort", 0);//串口 position
+            SPUtils.put(this, "Baud", 115200);//波特率 默认9600
+            SPUtils.put(this, "camera", true);//摄像头 默认开启
+            SPUtils.put(this, "temperature", true);//温度 默认显示
+            SPUtils.put(this, "voice", true);//语音播报 默认开启
+//            HashMap<String, Integer> mapConfig = new HashMap<>();
+//            mapConfig.put("SerialPort", 0);
+//            mapConfig.put("Baud", 9600);
+//            mapConfig.put("camera", 1);
+//            mapConfig.put("temperature", 1);
+//            mapConfig.put("voice", 1);
+            Log.d(TAG, "onCreate: 本地配置 首次启动 ---");
+
+        } else {
+
+            SerialPort = (int) SPUtils.get(this, "SerialPort", 0);
+            Baud = (int) SPUtils.get(this, "Baud", 115200);
+            cameraOpen = (Boolean) SPUtils.get(this, "camera", true);
+            temperatureShow = (Boolean) SPUtils.get(this, "temperature", true);
+            voiceOpen = (Boolean) SPUtils.get(this, "voice", true);
+
+            tvSp.setText("串口：" + devices.get(SerialPort).getName());
+            button_camera.setText(cameraOpen ? "摄像头：开启" : "摄像头：关闭");
+            button_temp.setText(temperatureShow ? "温度：显示" : "温度：隐藏");
+            button_voice.setText(voiceOpen ? "语音播报：开启" : "语音播报：关闭");
+            editText_portspeed.setText(Baud+"");
+
+            Log.d(TAG, "onCreate: 本地配置 "+"串口"+SerialPort+"\n"
+                    +"波特率"+Baud+"\n"
+                    +"摄像头"+cameraOpen+"\n"
+                    +"温度"+temperatureShow+"\n"
+                    +"语音播报"+voiceOpen+"\n"
+            );
+
+
+
+        }
 
     }
 
@@ -299,21 +422,41 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private void analysisTemp(final double temp) {
         if (35 < temp && temp < 40) {
             if (atCDboolean) {
-                //语言播报/打开摄像头/显示温度
+
                 atCDboolean = false;
-                showCamera();
-//                int i=mSpeech.speak(temp+"度"+"体温正常",TextToSpeech.QUEUE_ADD, null);
-                if (35 < temp && temp < 37.3) {
-                    mKqwSpeechSynthesizer.start(temp + "度" + "体温正常");
-                } else {
-                    mKqwSpeechSynthesizer.start(temp + "度" + "体温异常");
+
+                if (cameraOpen) { //打开 摄像头
+                    showCamera();
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        tvTemp.setText(temp+"℃");
+                if (voiceOpen) {//语音播报
+                    if (35 < temp && temp < 37.3) {
+                        mKqwSpeechSynthesizer.start(temp + "度" + "体温正常");
+                    } else {
+                        mKqwSpeechSynthesizer.start(temp + "度" + "体温异常");
                     }
-                });
+                }
+
+                if (temperatureShow) {//显示温度
+
+                    if (!cameraOpen) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(sMainActivity, temp+"℃", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                    }
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvTemp.setText(temp + "℃");
+                        }
+                    });
+                }
+
+
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -431,6 +574,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             camera = null;
         }
     }
+
 
 }
 

@@ -6,8 +6,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * author:why
- * created on: 2018/6/5 11:28
+ * author:kai
+ * created on: 2020/5/21 11:28
  * description:
  */
 public class SharedData {

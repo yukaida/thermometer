@@ -14,9 +14,9 @@ import com.iflytek.cloud.SynthesizerListener;
 import com.iflytek.cloud.util.ResourceUtil;
 
 /**
- * 语音合成器
+ * 讯飞离线语音合成器
  *
- * @author kongqw
+ * @author kai
  */
 public class KqwSpeechSynthesizer {
 
