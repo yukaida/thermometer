@@ -1,6 +1,7 @@
 package com.ebanswers.thermometer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -15,15 +16,19 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +45,8 @@ import com.yhao.floatwindow.PermissionListener;
 import com.yhao.floatwindow.Screen;
 import com.yhao.floatwindow.ViewStateListener;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -53,6 +60,8 @@ import utils.DataConversion;
 import utils.HexUtils;
 import utils.KqwSpeechSynthesizer;
 import utils.SPUtils;
+import utils.ToastCustom;
+import utils.TxtUtils;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = "MainActivity";
@@ -86,11 +95,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     Button button_voice;
     Button button_save;
     Button button_restoreCamera;
-    
+
     EditText editText_portspeed;
     EditText editText_windowWidth;
     EditText editText_windowHeight;
-    
+
     public static MainActivity sMainActivity;
     ArrayList<Device> devices;
     Handler handler = new Handler() {
@@ -148,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     private Context othercontext;
     private SharedPreferences sp;
-    boolean appIntsalled=false;
+    boolean appIntsalled = false;
 
     @Override
     protected void onDestroy() {
@@ -175,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         appIntsalled = isAvilible(this, "com.dsplayer")
                 && isAvilible(this, "com.ebanswers.auxtool")
                 && isAvilible(this, "com.ebanswers.aotoshutdown");
-
+        Log.d(TAG, "授权 应用安装：" + appIntsalled);
 
 //-------------------读取com.dsplayer APP的sharedpreferences文件，若PLAYER_ID属性是否包含有效整数值-------------------------------
         try {
@@ -188,14 +197,51 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         try {
             //根据Context取得对应的SharedPreferences
-            sp = othercontext.getSharedPreferences("ebanswers_preferences", Context.MODE_WORLD_READABLE);
-            Log.d(TAG, "授权sp：" + sp.toString());
+            sp = othercontext.getSharedPreferences("ebanswers_preferences", Context.MODE_WORLD_WRITEABLE);
+            Log.d(TAG, "授权sp：" + sp.getAll().toString());
             authorization = sp.getInt("PLAYER_ID", 0);
             Log.d(TAG, "授权sp：" + authorization);
 
         } catch (Exception e) {
             Log.d(TAG, "授权sp：" + e);
         }
+
+        try {
+            Context dsplayerAppContext = getApplicationContext().createPackageContext("com.dsplayer", Context.MODE_WORLD_WRITEABLE);
+            authorization = dsplayerAppContext.getSharedPreferences("ebanswers_preferences", Context.MODE_WORLD_WRITEABLE).getInt("PLAYER_ID", 0);
+            Log.d(TAG, "授权sp2: " + dsplayerAppContext.getSharedPreferences("ebanswers_preferences", Context.MODE_WORLD_WRITEABLE).getAll().toString());
+            Log.d(TAG, "授权sp2：" + authorization);
+
+        } catch (Exception e) {
+
+        }
+
+
+        try {
+//                String content = TxtUtils.readFromXML("/storage/emulated/0/ebanswers/appconfig.js");
+            String content = TxtUtils.readFromXML("/sdcard/ebanswers/appconfig.js");
+            Log.d(TAG, "授权sp2: " + content);
+            String jsonString = content.substring(15);
+            Log.d(TAG, "授权sp2: " + jsonString);
+//                String jsonString2 =content.substring(0, jsonString.length() - 1);
+            String jsonString2 = jsonString.trim().replace(";", "");
+//                if (("PlayerId")) {
+//
+//                }
+            Log.d(TAG, "授权sp2  jsonString2: " + jsonString2);
+            JSONObject jsonObject = new JSONObject(jsonString2);
+            int id = jsonObject.getInt("PlayerId");
+            Log.d(TAG, "授权sp2 id: " + id);
+
+            if (id > 10) {
+                authorization = 1;
+            }
+
+
+        } catch (Exception e) {
+        }
+
+
 //-----------------------------------------------------------------------------------------------
 
         button_exit = findViewById(R.id.button_exit);
@@ -256,19 +302,19 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_restoreCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 windowWidth = 300;
-                 windowHeight = 400;
-                 windowX = 800;
-                 windowY = 300;
+                windowWidth = 300;
+                windowHeight = 400;
+                windowX = 800;
+                windowY = 300;
                 SPUtils.put(MainActivity.this, "windowWidth", 300);//悬浮窗宽 默认300
                 SPUtils.put(MainActivity.this, "windowHeight", 400);//悬浮窗宽 默认400
                 SPUtils.put(MainActivity.this, "windowX", 800);//悬浮窗位置x 默认800
                 SPUtils.put(MainActivity.this, "windowY", 300);//悬浮窗位置y 默认300
                 Toast.makeText(MainActivity.this, "重置成功,请点击“退出应用”,并重启应用", Toast.LENGTH_SHORT).show();
-                
+
             }
         });
-        
+
         button_voice = findViewById(R.id.button_speak);
         button_voice.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -482,6 +528,48 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     + "语音播报" + voiceOpen + "\n"
                     + "悬浮窗宽：" + windowWidth + "_高:" + windowHeight + "_X：" + windowX + "_Y" + windowY);
 
+
+            if (button.getText().equals("开始读取温度")) {
+                if (!editText_portspeed.getText().toString().trim().isEmpty()) {
+                    Baud = Integer.valueOf(editText_portspeed.getText().toString().trim());
+                }
+                boolean openSerialPort = mSerialPortManager.openSerialPort(devices.get(SerialPort).getFile(), Baud);
+                Log.d(TAG, "onCreate: SerialPort open :--" + devices.get(SerialPort).getName() + "--succeed ? " + openSerialPort);
+                if (!openSerialPort) {
+                    Toast.makeText(MainActivity.this, "串口打开失败,请切换串口,波特率或检查设备", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Toast.makeText(MainActivity.this, "打开成功,开始读取温度,串口" + devices.get(SerialPort).getName() + "波特率" + Baud, Toast.LENGTH_SHORT).show();
+                SPUtils.put(MainActivity.this, "Baud", Baud);//波特率 默认9600
+                SPUtils.put(MainActivity.this, "SerialPort", SerialPort);//波特率 默认9600
+            }
+
+
+            if (readTemp) {
+                readTemp = false;
+                button.setText("继续");
+            } else {
+                readTemp = true;
+                button.setText("停止读取温度");
+            }
+
+            if (readTemp) {
+                timer = new Timer();
+                timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
+                    }
+                };
+                timer.schedule(timerTask, 0, 1000);
+            } else {
+                if (null != timerTask) {
+                    timerTask.cancel();
+                }
+                if (null != timer) {
+                    timer.cancel();
+                }
+            }
         }
 
         editText_windowWidth.setHint("悬浮窗宽" + windowWidth);
@@ -506,6 +594,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         Message messagehide = new Message();
         messagehide.what = 1;
         handler.sendMessage(messagehide);//隐藏悬浮窗
+
+
+        Intent home = new Intent(Intent.ACTION_MAIN);
+        home.addCategory(Intent.CATEGORY_HOME);
+        startActivity(home);
 
     }
 
@@ -544,14 +637,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 messagehide.what = 1;
                 handler.sendMessage(messagehide);
             }
-        }, 5000);//5秒后执行Runnable中的run方法
+        }, 2000);//5秒后执行Runnable中的run方法
     }
 
     private void analysisTemp(final double temp) {
         if (35 < temp && temp < 40) {
             if (atCDboolean) {
 
-                if (authorization == 0||!appIntsalled) {
+                if (authorization == 0 || !appIntsalled) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -579,48 +672,69 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(sMainActivity, temp + "℃", Toast.LENGTH_SHORT).show();
+                                Toast toast = Toast.makeText(getApplicationContext(),
+                                        "", Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.CENTER, 0, 0);
+                                toast.show();
+//                                ToastCustom.makeText(temp + "℃",getApplicationContext());
+
+                                LinearLayout toastView = (LinearLayout) toast.getView();
+                                WindowManager wm = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
+                                DisplayMetrics outMetrics = new DisplayMetrics();
+                                wm.getDefaultDisplay().getMetrics(outMetrics);
+                                TextView tv = new TextView(MainActivity.this);
+
+                                tv.setTextSize(50);
+                                toastView.setGravity(Gravity.CENTER);
+                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                                params.setMargins(0, 0, 0, 50);
+                                tv.setLayoutParams(params);
+                                toast.setView(toastView);
+                                toastView.addView(tv);
+                                tv.setText(temp + "℃");
                             }
                         });
 
-                    }
-
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            tvTemp.setText(temp + "℃");
-                        }
-                    });
-
-                } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            tvTemp.setText(temp + "℃");
-                            tvTemp.setText("");
-                        }
-                    });
                 }
 
 
-                handler.postDelayed(new Runnable() {
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //要执行的操作
-                        atCDboolean = true;
-                        Message messagehide = new Message();
-                        messagehide.what = 1;
-                        handler.sendMessage(messagehide);
+                        tvTemp.setText(temp + "℃");
                     }
-                }, 5000);//5秒后执行Runnable中的run方法
+                });
 
-                if (cameraOpen) { //打开 摄像头
-                    showCamera();
+            } else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvTemp.setText(temp + "℃");
+                        tvTemp.setText("");
+                    }
+                });
+            }
+
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    //要执行的操作
+                    atCDboolean = true;
+                    Message messagehide = new Message();
+                    messagehide.what = 1;
+                    handler.sendMessage(messagehide);
                 }
+            }, 5000);//5秒后执行Runnable中的run方法
+
+            if (cameraOpen) { //打开 摄像头
+                showCamera();
             }
         }
     }
+
+}
 
     private boolean atCD() {
         if (atCDboolean) {
