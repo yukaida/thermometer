@@ -2,6 +2,7 @@ package com.ebanswers.thermometer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Handler;
@@ -43,6 +44,7 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -169,21 +171,29 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //---------系统已安装”com.dsplayer”,” com.ebanswers.auxtool”和” com.ebanswers.aotoshutdown”这个三个APP---------
 
+
+//-------------------读取com.dsplayer APP的sharedpreferences文件，若PLAYER_ID属性是否包含有效整数值-------------------------------
         try {
             othercontext = createPackageContext("com.dsplayer", Context.CONTEXT_IGNORE_SECURITY);
+            Log.d(TAG, "授权:" + othercontext.getPackageName());
         } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "授权:" + e);
             e.printStackTrace();
         }
 
         try {
             //根据Context取得对应的SharedPreferences
             sp = othercontext.getSharedPreferences("ebanswers_preferences", Context.MODE_WORLD_READABLE);
-            int name = sp.getInt("PLAYER_ID", 0);
+            Log.d(TAG, "授权sp：" + sp.toString());
+            authorization = sp.getInt("PLAYER_ID", 0);
+            Log.d(TAG, "授权sp：" + authorization);
+
         } catch (Exception e) {
-
+            Log.d(TAG, "授权sp：" + e);
         }
-
+//-----------------------------------------------------------------------------------------------
 
         button_exit = findViewById(R.id.button_exit);
 
@@ -213,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     button_temp.setText("温度：显示");
                 }
                 temperatureShow = temperatureShow ? false : true;
-                SPUtils.put(MainActivity.this, "temperature", temperatureShow );//温度
+                SPUtils.put(MainActivity.this, "temperature", temperatureShow);//温度
             }
         });
 
@@ -249,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     button_voice.setText("语音播报：开启");
                 }
                 voiceOpen = voiceOpen ? false : true;
-                SPUtils.put(MainActivity.this, "voice", voiceOpen );//语音
+                SPUtils.put(MainActivity.this, "voice", voiceOpen);//语音
             }
         });
 
@@ -315,8 +325,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         constraintLayout.addView(tvTemp);
 
 
-
-
         button = findViewById(R.id.button_readtemp);//开始读取温度按钮
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -336,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         Toast.makeText(MainActivity.this, "串口打开失败,请切换串口,波特率或检查设备", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    Toast.makeText(MainActivity.this, "打开成功,开始读取温度,串口"+devices.get(SerialPort).getName()+"波特率"+Baud, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "打开成功,开始读取温度,串口" + devices.get(SerialPort).getName() + "波特率" + Baud, Toast.LENGTH_SHORT).show();
                     SPUtils.put(MainActivity.this, "Baud", Baud);//波特率 默认9600
                     SPUtils.put(MainActivity.this, "SerialPort", SerialPort);//波特率 默认9600
 
@@ -437,17 +445,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             temperatureShow = (Boolean) SPUtils.get(this, "temperature", true);
             voiceOpen = (Boolean) SPUtils.get(this, "voice", true);
 
-            windowX=(int)SPUtils.get(this, "windowX", 800);//悬浮窗位置x 默认800
-            windowY=(int)SPUtils.get(this, "windowY", 300);//悬浮窗位置x 默认300
-            windowWidth=(int)SPUtils.get(this, "windowWidth", 300);//悬浮窗宽 默认300
-            windowHeight=(int)SPUtils.get(this, "windowHeight", 400);//悬浮窗高 默认400
+            windowX = (int) SPUtils.get(this, "windowX", 800);//悬浮窗位置x 默认800
+            windowY = (int) SPUtils.get(this, "windowY", 300);//悬浮窗位置x 默认300
+            windowWidth = (int) SPUtils.get(this, "windowWidth", 300);//悬浮窗宽 默认300
+            windowHeight = (int) SPUtils.get(this, "windowHeight", 400);//悬浮窗高 默认400
             tvSp.setText("串口：" + devices.get(SerialPort).getName());
             button_camera.setText(cameraOpen ? "摄像头：开启" : "摄像头：关闭");
             button_temp.setText(temperatureShow ? "温度：显示" : "温度：隐藏");
             button_voice.setText(voiceOpen ? "语音播报：开启" : "语音播报：关闭");
-            editText_portspeed.setText(Baud+"");
+            editText_portspeed.setText(Baud + "");
 
-            Log.d(TAG, "本地配置 " +"\n"+ "串口" + SerialPort + "\n"
+            Log.d(TAG, "本地配置 " + "\n" + "串口" + SerialPort + "\n"
                     + "波特率" + Baud + "\n"
                     + "摄像头" + cameraOpen + "\n"
                     + "温度" + temperatureShow + "\n"
@@ -522,6 +530,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (35 < temp && temp < 40) {
             if (atCDboolean) {
 
+                if (authorization == 0) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(sMainActivity, "软件未授权", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                }
+
                 atCDboolean = false;
 
                 Log.d(TAG, "摄像头: " + cameraOpen + "  语音：" + voiceOpen + "  温度" + temperatureShow);
@@ -537,25 +555,25 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
                 if (temperatureShow) {//显示温度
 
-               if (!cameraOpen) {
+                    if (!cameraOpen) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(sMainActivity, temp+"℃", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(sMainActivity, temp + "℃", Toast.LENGTH_SHORT).show();
                             }
                         });
 
                     }
 
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                tvTemp.setText(temp + "℃");
-                            }
-                        });
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvTemp.setText(temp + "℃");
+                        }
+                    });
 
-                }else {
+                } else {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -688,6 +706,21 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
     }
 
+
+    private boolean isAvilible(Context context, String packageName) {
+        final PackageManager packageManager = context.getPackageManager();
+
+        // 获取所有已安装程序的包信息
+        List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);
+        for (int i = 0; i < pinfo.size(); i++) {
+            // 循环判断是否存在指定包名
+            if (pinfo.get(i).packageName.equalsIgnoreCase(packageName)) {
+                return true;
+            }
+
+        }
+        return false;
+    }
 
 }
 

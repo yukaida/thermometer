@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusedByDefault="true"
     tools:context=".MainActivity">
 
     <Button
@@ -80,6 +81,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="高：默认300"
+        android:focusedByDefault="false"
         android:inputType="number"
         app:layout_constraintBottom_toBottomOf="@+id/editText_width"
         app:layout_constraintEnd_toStartOf="@+id/button_save"
