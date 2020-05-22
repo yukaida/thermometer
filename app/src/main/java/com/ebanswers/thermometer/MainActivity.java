@@ -85,12 +85,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     Button button_temp;
     Button button_voice;
     Button button_save;
-
+    Button button_restoreCamera;
+    
     EditText editText_portspeed;
     EditText editText_windowWidth;
     EditText editText_windowHeight;
-
-
+    
     public static MainActivity sMainActivity;
     ArrayList<Device> devices;
     Handler handler = new Handler() {
@@ -251,7 +251,24 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 }
             }
         });
-
+//重置悬浮窗
+        button_restoreCamera = findViewById(R.id.button_restorecamera);
+        button_restoreCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                 windowWidth = 300;
+                 windowHeight = 400;
+                 windowX = 800;
+                 windowY = 300;
+                SPUtils.put(MainActivity.this, "windowWidth", 300);//悬浮窗宽 默认300
+                SPUtils.put(MainActivity.this, "windowHeight", 400);//悬浮窗宽 默认400
+                SPUtils.put(MainActivity.this, "windowX", 800);//悬浮窗位置x 默认800
+                SPUtils.put(MainActivity.this, "windowY", 300);//悬浮窗位置y 默认300
+                Toast.makeText(MainActivity.this, "重置成功,请点击“退出应用”,并重启应用", Toast.LENGTH_SHORT).show();
+                
+            }
+        });
+        
         button_voice = findViewById(R.id.button_speak);
         button_voice.setOnClickListener(new View.OnClickListener() {
             @Override

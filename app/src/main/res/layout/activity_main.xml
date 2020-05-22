@@ -131,4 +131,24 @@
         app:layout_constraintStart_toStartOf="@+id/button_readtemp"
         app:layout_constraintTop_toBottomOf="@+id/button_readtemp" />
 
+    <Button
+        android:id="@+id/button_restorecamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="重置悬浮窗位置"
+        app:layout_constraintEnd_toEndOf="@+id/button_exit"
+        app:layout_constraintStart_toStartOf="@+id/button_exit"
+        app:layout_constraintTop_toBottomOf="@+id/button_exit" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="148dp"
+        android:layout_height="73dp"
+        android:layout_marginTop="32dp"
+        android:text="若调整位置后悬浮窗不显示，则位置位于屏幕外，请重置"
+        app:layout_constraintEnd_toEndOf="@+id/button_restorecamera"
+        app:layout_constraintStart_toStartOf="@+id/button_restorecamera"
+        app:layout_constraintTop_toBottomOf="@+id/button_restorecamera" />
+
 </android.support.constraint.ConstraintLayout>
