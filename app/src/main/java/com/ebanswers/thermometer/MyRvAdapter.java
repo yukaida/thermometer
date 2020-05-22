@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -30,6 +31,7 @@ public class MyRvAdapter extends RecyclerView.Adapter<MyRvAdapter.MyHoler> {
             public void onClick(View v) {
                 MainActivity.sMainActivity.tvSp.setText("串口："+spList.get(holder.getAdapterPosition()));
                 MainActivity.sMainActivity.SerialPort = holder.getAdapterPosition();
+                Toast.makeText(MainActivity.sMainActivity, spList.get(holder.getAdapterPosition()), Toast.LENGTH_SHORT).show();
             }
         });
 
