@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     private Context othercontext;
     private SharedPreferences sp;
-
+    boolean appIntsalled=false;
 
     @Override
     protected void onDestroy() {
@@ -172,6 +172,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         setContentView(R.layout.activity_main);
 
         //---------系统已安装”com.dsplayer”,” com.ebanswers.auxtool”和” com.ebanswers.aotoshutdown”这个三个APP---------
+        appIntsalled = isAvilible(this, "com.dsplayer")
+                && isAvilible(this, "com.ebanswers.auxtool")
+                && isAvilible(this, "com.ebanswers.aotoshutdown");
 
 
 //-------------------读取com.dsplayer APP的sharedpreferences文件，若PLAYER_ID属性是否包含有效整数值-------------------------------
@@ -324,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         constraintLayout.addView(tvTemp);
 
-
+//--------------------------开始读取温度---------------------------------
         button = findViewById(R.id.button_readtemp);//开始读取温度按钮
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -378,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 }
             }
         });
-
+//---------------------------------------------------------------
         //串口管理器
         mSerialPortManager = new SerialPortManager();
 
@@ -467,6 +470,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         editText_windowWidth.setHint("悬浮窗宽" + windowWidth);
         editText_windowHeight.setHint("高：" + windowHeight);
 
+        //-------------------悬浮窗--------------------------------------
         FloatWindow
                 .with(getApplicationContext())
                 .setView(constraintLayout)
@@ -530,14 +534,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (35 < temp && temp < 40) {
             if (atCDboolean) {
 
-                if (authorization == 0) {
+                if (authorization == 0||!appIntsalled) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(sMainActivity, "软件未授权", Toast.LENGTH_SHORT).show();
                         }
                     });
-
                 }
 
                 atCDboolean = false;
