@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:text="语音播报：开启"
         app:layout_constraintBottom_toBottomOf="@+id/button_temp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button_lang"
         app:layout_constraintStart_toEndOf="@+id/button_temp"
         app:layout_constraintTop_toTopOf="@+id/button_temp" />
 
@@ -152,5 +152,47 @@
         app:layout_constraintEnd_toEndOf="@+id/button_restorecamera"
         app:layout_constraintStart_toStartOf="@+id/button_restorecamera"
         app:layout_constraintTop_toBottomOf="@+id/button_restorecamera" />
+
+    <EditText
+        android:id="@+id/editText_temp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:ems="10"
+        android:visibility="invisible"
+        android:hint="体温异常下限：默认37.3℃"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toTopOf="@+id/button_camera"
+        app:layout_constraintStart_toStartOf="@+id/button_camera" />
+
+    <Button
+        android:id="@+id/button_tempset"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="设定"
+        app:layout_constraintBottom_toBottomOf="@+id/editText_temp"
+        app:layout_constraintStart_toEndOf="@+id/editText_temp"
+        app:layout_constraintTop_toTopOf="@+id/editText_temp" />
+
+    <Button
+        android:id="@+id/button_reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="重置全部并退出"
+        app:layout_constraintEnd_toEndOf="@+id/textView"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        tools:layout_editor_absoluteY="533dp" />
+
+    <Button
+        android:id="@+id/button_lang"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="语音语言：中文"
+        app:layout_constraintBottom_toBottomOf="@+id/button_speak"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_speak"
+        app:layout_constraintTop_toTopOf="@+id/button_speak" />
 
 </android.support.constraint.ConstraintLayout>
