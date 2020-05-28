@@ -19,6 +19,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -39,6 +40,7 @@ import com.kongqw.serialportlibrary.SerialPortFinder;
 import com.kongqw.serialportlibrary.SerialPortManager;
 import com.kongqw.serialportlibrary.listener.OnOpenSerialPortListener;
 import com.kongqw.serialportlibrary.listener.OnSerialPortDataListener;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.yhao.floatwindow.FloatWindow;
 import com.yhao.floatwindow.MoveType;
 import com.yhao.floatwindow.PermissionListener;
@@ -107,17 +109,19 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         public void handleMessage(@NonNull Message msg) {
             switch (msg.what) {
                 case 0://显示
-                    FloatWindow.get("camera").show();
-
+                    if (FloatWindow.get("camera") != null)
+                        FloatWindow.get("camera").show();
                     break;
                 case 1://隐藏
-                    FloatWindow.get("camera").hide();
-                    SPUtils.put(MainActivity.this, "windowX", FloatWindow.get("camera").getX());//悬浮窗位置x 默认300
-                    SPUtils.put(MainActivity.this, "windowY", FloatWindow.get("camera").getY());//悬浮窗位置x 默认300
-
+                    if (FloatWindow.get("camera") != null) {
+                        FloatWindow.get("camera").hide();
+                        SPUtils.put(MainActivity.this, "windowX", FloatWindow.get("camera").getX());//悬浮窗位置x 默认300
+                        SPUtils.put(MainActivity.this, "windowY", FloatWindow.get("camera").getY());//悬浮窗位置x 默认300
+                    }
                     break;
                 case 2://修改位置
-                    FloatWindow.get("camera").updateX(500);
+                    if (FloatWindow.get("camera") != null)
+                        FloatWindow.get("camera").updateX(500);
                     break;
             }
         }
@@ -158,6 +162,15 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private Context othercontext;
     private SharedPreferences sp;
     boolean appIntsalled = false;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            moveTaskToBack(false);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override
     protected void onDestroy() {
@@ -600,8 +613,24 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         home.addCategory(Intent.CATEGORY_HOME);
         startActivity(home);
 
+//        Intent i = new Intent("com.ebanswers.startDog");
+//        i.putExtra("package", getPackageName(getApplicationContext()));
+//        i.putExtra("callbackActivity", "MainActivity");
+//        sendBroadcast(i);
+        CrashReport.initCrashReport(getApplicationContext(), "70c3427e4d", false);
     }
 
+    public static synchronized String getPackageName(Context context) {
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(
+                    context.getPackageName(), 0);
+            return packageInfo.packageName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     //解析传入的16进制指令,返回温度,如 A0A10021081A01AA   33.8
     private double getTempWithHex(String hexString) {
         try {
@@ -641,22 +670,18 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     private void analysisTemp(final double temp) {
-        if (35 < temp && temp < 40) {
-            if (atCDboolean) {
-
-                if (authorization == 0 || !appIntsalled) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(sMainActivity, "软件未授权", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+        if (authorization == 0 || !appIntsalled) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(sMainActivity, "软件未授权", Toast.LENGTH_SHORT).show();
                 }
-
+            });
+        } else if (35 < temp && temp < 40) {
+            if (atCDboolean) {
                 atCDboolean = false;
 
                 Log.d(TAG, "摄像头: " + cameraOpen + "  语音：" + voiceOpen + "  温度" + temperatureShow);
-
 
                 if (voiceOpen) {//语音播报
                     if (35 < temp && temp < 37.3) {
@@ -696,45 +721,44 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                             }
                         });
 
+                    }
+
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvTemp.setText(temp + "℃");
+                        }
+                    });
+
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tvTemp.setText(temp + "℃");
+                            tvTemp.setText("");
+                        }
+                    });
                 }
 
-
-                runOnUiThread(new Runnable() {
+                handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        tvTemp.setText(temp + "℃");
+                        //要执行的操作
+                        atCDboolean = true;
+                        Message messagehide = new Message();
+                        messagehide.what = 1;
+                        handler.sendMessage(messagehide);
                     }
-                });
+                }, 5000);//5秒后执行Runnable中的run方法
 
-            } else {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        tvTemp.setText(temp + "℃");
-                        tvTemp.setText("");
-                    }
-                });
-            }
-
-
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //要执行的操作
-                    atCDboolean = true;
-                    Message messagehide = new Message();
-                    messagehide.what = 1;
-                    handler.sendMessage(messagehide);
+                if (cameraOpen) { //打开 摄像头
+                    showCamera();
                 }
-            }, 5000);//5秒后执行Runnable中的run方法
-
-            if (cameraOpen) { //打开 摄像头
-                showCamera();
             }
         }
-    }
 
-}
+    }
 
     private boolean atCD() {
         if (atCDboolean) {

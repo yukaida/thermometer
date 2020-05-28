@@ -54,8 +54,13 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    //串口
     implementation 'com.github.kongqw:AndroidSerialPort:1.0.1'
+    //悬浮窗
     implementation 'com.github.yhaolpz:FloatWindow:1.0.9'
     implementation files('libs/Msc.jar')
+
     implementation 'com.android.support:recyclerview-v7:28.0.0'
+    //bugly漏洞检测
+    implementation 'com.tencent.bugly:crashreport:latest.release'
 }
