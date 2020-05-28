@@ -476,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     Toast.makeText(MainActivity.this, "打开成功,开始读取温度,串口" + devices.get(SerialPort).getName() + "波特率" + Baud, Toast.LENGTH_SHORT).show();
                     SPUtils.put(MainActivity.this, "Baud", Baud);//波特率 默认9600
                     SPUtils.put(MainActivity.this, "SerialPort", SerialPort);//波特率 默认9600
-                    SPUtils.put(MainActivity.this, "success", false);//是否成功运行过
+                    SPUtils.put(MainActivity.this, "success", true);//是否成功运行过
                 }
 
 
@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //        boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
 
 
-        if (!SPUtils.contains(this, "success")) {
+        if (!(Boolean) SPUtils.get(this, "success", false)) {
             SPUtils.put(this, "SerialPort", spName.indexOf("ttyS3"));//串口 position
             SPUtils.put(this, "success", false);//是否成功运行过
             SPUtils.put(this, "language", "zh");//语言
@@ -575,10 +575,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
             SerialPort = (int) SPUtils.get(this, "SerialPort", 4);
 //
-            Baud = (int) SPUtils.get(this, "Baud", 9600);
-            editText_portspeed.setText(Baud+"");
 
-            lang=(String) SPUtils.get(this, "language", "zh");
+            Baud = (int) SPUtils.get(this, "Baud", 9600);
+            editText_portspeed.setText(Baud + "");
+
+            lang = (String) SPUtils.get(this, "language", "zh");
             if (!"zh".equals(lang)) {
                 button_lang.setText("语音语言：English");
                 lang = "en";
@@ -759,7 +760,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 Log.d(TAG, "摄像头: " + cameraOpen + "  语音：" + voiceOpen + "  温度" + temperatureShow);
 
                 if (voiceOpen) {//语音播报
-                    //todo  做一个英文版
+
 
 //
                     if ("zh".equals(lang)) {
