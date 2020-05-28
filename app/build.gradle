@@ -8,8 +8,8 @@ android {
         applicationId "com.ebanswers.thermometer"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
@@ -63,4 +63,6 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:28.0.0'
     //bugly漏洞检测
     implementation 'com.tencent.bugly:crashreport:latest.release'
+
+    implementation 'com.orhanobut:logger:2.2.0'
 }

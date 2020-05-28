@@ -29,8 +29,8 @@ public class MyRvAdapter extends RecyclerView.Adapter<MyRvAdapter.MyHoler> {
         holder.linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.sMainActivity.tvSp.setText("串口："+spList.get(holder.getAdapterPosition()));
-                MainActivity.sMainActivity.SerialPort = holder.getAdapterPosition();
+                MainActivity.sMainActivity.tvSp.setText(spList.get(holder.getAdapterPosition()));
+                MainActivity.sMainActivity.SerialPort = spList.get(holder.getAdapterPosition());
                 Toast.makeText(MainActivity.sMainActivity, spList.get(holder.getAdapterPosition()), Toast.LENGTH_SHORT).show();
             }
         });
