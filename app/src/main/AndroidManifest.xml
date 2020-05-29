@@ -43,22 +43,23 @@
         android:label="@string/app_name"
         android:name=".MyApplication"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:configChanges="keyboardHidden|orientation|screenSize|locale|screenLayout|mcc|mnc"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:launchMode="singleTask"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-
         <receiver android:name="receiver.BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.HOME" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </receiver>
     </application>

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     public static MainActivity sMainActivity;
 
-
+    int createtime = 0;
 
     ArrayList<Device> devices;
     Handler handler = new Handler() {
@@ -148,10 +149,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     boolean appIntsalled = false;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        Logger.d("启动次数"+createtime);
+        createtime++;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -192,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 mKqwSpeechSynthesizer.stop();
 
                 finish();
+                System.exit(0);
+
             }
         });
 
@@ -449,7 +452,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             SPUtils.put(this, "windowY", 300);//悬浮窗位置y 默认300
             SPUtils.put(this, "temperatureNumber", 37.3);//异常体温下限
 
-            Log.d(TAG, "onCreate: 本地配置 首次启动 ---串口" + spName.indexOf("ttyS3")+"波特率"+9600);
+            Log.d(TAG, "onCreate: 本地配置 首次启动 ---串口" + spName.indexOf("ttyS3") + "波特率" + 9600);
 
         } else {
             //打开应用之前成功启动过
@@ -553,7 +556,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
 
 
-
         Message messagehide = new Message();
         messagehide.what = 1;
         handler.sendMessage(messagehide);//隐藏悬浮窗
@@ -578,6 +580,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         if (null != timerTask) {
             timerTask.cancel();
         }
@@ -657,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     } else {
 
                         if (35 < temp && temp < tempNumber) {
-                            mKqwSpeechSynthesizer.start("thirty"+ NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(1,2))) +"point"+ NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(3))) + " degrees, normal temperature");
+                            mKqwSpeechSynthesizer.start("thirty" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(1, 2))) + "point" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(3))) + " degrees, normal temperature");
                         } else {
                             mKqwSpeechSynthesizer.start(temp + "degrees, abnormal temperature");
                         }
@@ -806,7 +809,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             camera.setParameters(params);
             camera.startPreview();
         } catch (Exception e) {
-            Logger.e("摄像头",e);
+            Logger.e("摄像头", e);
             Toast.makeText(sMainActivity, "请检查摄像头设备", Toast.LENGTH_SHORT).show();
         }
 
@@ -865,7 +868,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         return false;
     }
 
-    private void getAuthorization(){
+    private void getAuthorization() {
         //---------系统已安装”com.dsplayer”,” com.ebanswers.auxtool”和” com.ebanswers.aotoshutdown”这个三个APP---------
         appIntsalled = isAvilible(this, "com.dsplayer")
                 && isAvilible(this, "com.ebanswers.auxtool")
@@ -929,6 +932,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
 //-----------------------------------------------------------------------------------------------
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+//        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+////land
+//        } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+////port
+//        }
+    }
+
 
 }
 
