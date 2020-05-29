@@ -37,6 +37,7 @@ import com.kongqw.serialportlibrary.SerialPortFinder;
 import com.kongqw.serialportlibrary.SerialPortManager;
 import com.kongqw.serialportlibrary.listener.OnOpenSerialPortListener;
 import com.kongqw.serialportlibrary.listener.OnSerialPortDataListener;
+import com.orhanobut.logger.Logger;
 import com.yhao.floatwindow.FloatWindow;
 import com.yhao.floatwindow.MoveType;
 import com.yhao.floatwindow.PermissionListener;
@@ -179,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FloatWindow.destroy("camera");
                 SPUtils.clear(MainActivity.this);
                 if (null != timerTask) {
                     timerTask.cancel();
@@ -188,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 }
                 mSerialPortManager.closeSerialPort();
                 mKqwSpeechSynthesizer.stop();
-                FloatWindow.destroy("camera");
+
                 finish();
             }
         });
@@ -305,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_exit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FloatWindow.destroy("camera");
                 if (null != timerTask) {
                     timerTask.cancel();
                 }
@@ -313,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 }
                 mSerialPortManager.closeSerialPort();
                 mKqwSpeechSynthesizer.stop();
-                FloatWindow.destroy("camera");
+
                 finish();
             }
         });
@@ -529,21 +532,27 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             }
         }
 
-        //-------------------悬浮窗--------------------------------------
-        FloatWindow
-                .with(getApplicationContext())
-                .setView(constraintLayout)
-                .setWidth(windowWidth)                               //设置控件宽高
-                .setHeight(windowHeight)
-                .setX(windowX)                                   //设置控件初始位置
-                .setY(windowY)
-                .setDesktopShow(true)                        //桌面显示
-                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
-                .setPermissionListener(mPermissionListener)  //监听权限申请结果
-                .setMoveType(MoveType.active)
-                .setTag("camera")
-                .setMoveStyle(500, new AccelerateInterpolator())  //贴边动画时长为500ms，加速插值器
-                .build();//悬浮窗对象实例化
+        try {
+            //-------------------悬浮窗--------------------------------------
+            FloatWindow
+                    .with(getApplicationContext())
+                    .setView(constraintLayout)
+                    .setWidth(windowWidth)                               //设置控件宽高
+                    .setHeight(windowHeight)
+                    .setX(windowX)                                   //设置控件初始位置
+                    .setY(windowY)
+                    .setDesktopShow(true)                        //桌面显示
+                    .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+                    .setPermissionListener(mPermissionListener)  //监听权限申请结果
+                    .setMoveType(MoveType.active)
+                    .setTag("camera")
+                    .setMoveStyle(500, new AccelerateInterpolator())  //贴边动画时长为500ms，加速插值器
+                    .build();//悬浮窗对象实例化
+        } catch (Exception e) {
+            Logger.e("悬浮窗", e);
+        }
+
+
 
         Message messagehide = new Message();
         messagehide.what = 1;
@@ -675,6 +684,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                                 wm.getDefaultDisplay().getMetrics(outMetrics);
                                 TextView tv = new TextView(MainActivity.this);
 
+
+                                if (35 < temp && temp < tempNumber) {
+                                    tv.setTextColor(getResources().getColor(R.color.greenyellow));
+                                } else {
+                                    tv.setTextColor(getResources().getColor(R.color.red));
+                                }
                                 tv.setTextSize(50);
                                 toastView.setGravity(Gravity.CENTER);
                                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -784,10 +799,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     };
 
     private void initCamera() {
-        Camera.Parameters params = camera.getParameters();
-        params.setRecordingHint(true);
-        camera.setParameters(params);
-        camera.startPreview();
+
+        try {
+            Camera.Parameters params = camera.getParameters();
+            params.setRecordingHint(true);
+            camera.setParameters(params);
+            camera.startPreview();
+        } catch (Exception e) {
+            Logger.e("摄像头",e);
+            Toast.makeText(sMainActivity, "请检查摄像头设备", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
@@ -801,7 +823,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 camera = null;
             }
             e.printStackTrace();
-            Toast.makeText(MainActivity.this, "启动摄像头失败,请开启摄像头权限", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "启动摄像头失败,请检查设备或开启摄像头权限", Toast.LENGTH_SHORT).show();
+//            if (null != timerTask) {
+//                timerTask.cancel();
+//            }
+//            if (null != timer) {
+//                timer.cancel();
+//            }
+//            mSerialPortManager.closeSerialPort();
+//            mKqwSpeechSynthesizer.stop();
+//            FloatWindow.destroy("camera");
+//            finish();
         }
     }
 
@@ -890,9 +922,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             if (id > 10) {
                 authorization = 1;
             }
-
-
         } catch (Exception e) {
+            Logger.e("授权", e);
         }
 
 
