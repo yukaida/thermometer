@@ -705,37 +705,55 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
                                 LinearLayout toastView = (LinearLayout) toast.getView();
                                 WindowManager wm = (WindowManager) getApplication().getSystemService(Context.WINDOW_SERVICE);
+
                                 DisplayMetrics outMetrics = new DisplayMetrics();
                                 wm.getDefaultDisplay().getMetrics(outMetrics);
                                 TextView tv = new TextView(MainActivity.this);
-
-
-                                if (35 < temp && temp < tempNumber) {
-                                    tv.setTextColor(getResources().getColor(R.color.greenyellow));
-                                } else {
-                                    tv.setTextColor(getResources().getColor(R.color.red));
-                                }
+                                tv.setTextColor(getResources().getColor(R.color.white));
                                 tv.setTextSize(50);
                                 toastView.setGravity(Gravity.CENTER);
+//                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+//                                        LinearLayout.LayoutParams.WRAP_CONTENT);
                                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
                                         LinearLayout.LayoutParams.WRAP_CONTENT);
-                                params.setMargins(0, 0, 0, 50);
+                                params.setMargins(0, 0, 0, 60);
                                 tv.setLayoutParams(params);
+//                                tv.setGravity(Gravity.CENTER);
                                 toast.setView(toastView);
                                 toastView.addView(tv);
-                                tv.setText(temp + "℃");
+                                if (35 < temp && temp < tempNumber) {
+                                    toastView.setBackground(getResources().getDrawable(R.drawable.toast_center_green));
+                                    tv.setText("正常体温： "+temp + "℃");
+                                } else {
+                                    toastView.setBackground(getResources().getDrawable(R.drawable.toast_center_red));
+                                    tv.setText("异常体温： "+temp + "℃");
+                                }
+
                             }
                         });
 
                     }
 
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            tvTemp.setText(temp + "℃");
-                        }
-                    });
+                    if (35 < temp && temp < tempNumber) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                tvTemp.setText("正常体温："+temp + "℃");
+                               tvTemp.setTextColor(getResources().getColor(R.color.greenyellow));
+                            }
+                        });
+                    }else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                tvTemp.setText("异常体温："+temp + "℃");
+                                tvTemp.setTextColor(getResources().getColor(R.color.red));
+                            }
+                        });
+                    }
+
+
 
                 } else {
                     runOnUiThread(new Runnable() {
