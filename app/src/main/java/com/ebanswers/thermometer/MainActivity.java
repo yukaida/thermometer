@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -49,6 +50,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -62,6 +64,11 @@ import utils.TxtUtils;
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = "MainActivity";
     SerialPortManager mSerialPortManager;
+
+    /**
+     * 语音朗读
+     */
+    protected TextToSpeech mTextToSpeech = null;
 
     boolean readTemp = false;//读取状态标识 false表示未处理读取状态
     boolean atCDboolean = true;//悬浮窗展示标识 true表示可展示
@@ -151,9 +158,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         Logger.d("启动次数"+createtime);
         createtime++;
         super.onCreate(savedInstanceState);
+        mTextToSpeech = getNewTextToSpeech();
         setContentView(R.layout.activity_main);
 
         getAuthorization();//授权
@@ -192,8 +201,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 mSerialPortManager.closeSerialPort();
                 mKqwSpeechSynthesizer.stop();
 
-                finish();
-                System.exit(0);
+                Toast.makeText(othercontext, "正在删除配置，请稍候", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                        System.exit(0);
+                    }
+                },2000);
+
 
             }
         });
@@ -212,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if (cameraOpen) {
                     button_camera.setText("摄像头：关闭");
                 } else {
@@ -560,11 +578,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         messagehide.what = 1;
         handler.sendMessage(messagehide);//隐藏悬浮窗
 
-        if (success) {
+
             Intent home = new Intent(Intent.ACTION_MAIN);
             home.addCategory(Intent.CATEGORY_HOME);
             startActivity(home);
-        }
+
     }
 
     //--------------------↑↑↑---------onCreate-------↑↑↑---------------------
@@ -652,17 +670,21 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     if ("zh".equals(lang)) {
 
                         if (35 < temp && temp < tempNumber) {
-                            mKqwSpeechSynthesizer.start(temp + "度" + "体温正常");
+//                            mKqwSpeechSynthesizer.start(temp + "度" + "体温正常");
+                            mTextToSpeech.speak(temp + "度" + "体温正常", TextToSpeech.QUEUE_FLUSH, null);
                         } else {
-                            mKqwSpeechSynthesizer.start(temp + "度" + "体温异常");
+//                            mKqwSpeechSynthesizer.start(temp + "度" + "体温异常");
+                            mTextToSpeech.speak(temp + "度" + "体温异常", TextToSpeech.QUEUE_FLUSH, null);
                         }
 
                     } else {
 
                         if (35 < temp && temp < tempNumber) {
-                            mKqwSpeechSynthesizer.start("thirty" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(1, 2))) + "point" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(3))) + " degrees, normal temperature");
+//                            mKqwSpeechSynthesizer.start("thirty" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(1, 2))) + "point" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(3))) + " degrees, normal temperature");
+                            mTextToSpeech.speak("thirty" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(1, 2))) + "point" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(3))) + " degrees, normal temperature", TextToSpeech.QUEUE_FLUSH, null);
                         } else {
-                            mKqwSpeechSynthesizer.start(temp + "degrees, abnormal temperature");
+//                            mKqwSpeechSynthesizer.start(temp + "degrees, abnormal temperature");
+                            mTextToSpeech.speak("thirty" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(1, 2))) + "point" + NumberToEnglishUtils.getEnglish(Integer.valueOf(String.valueOf(temp).substring(3))) + " degrees, abnormal temperature", TextToSpeech.QUEUE_FLUSH, null);
                         }
 
                     }
@@ -933,14 +955,24 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //-----------------------------------------------------------------------------------------------
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-//        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-////land
-//        } else if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-////port
-//        }
+    /**
+     * 返回实例化的TTS对象
+     * @return
+     */
+    protected TextToSpeech getNewTextToSpeech(){
+        return new TextToSpeech(this,new TextToSpeech.OnInitListener(){
+            @Override
+            public void onInit(int status){
+                // TODO Auto-generated method stub
+                if(status == TextToSpeech.SUCCESS){
+                    //设置朗读语言
+                    int supported = mTextToSpeech.setLanguage(Locale.CHINESE);
+                    if((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
+                        Toast.makeText(othercontext, "不支持当前语言", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
     }
 
 
