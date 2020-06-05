@@ -199,9 +199,10 @@
         android:id="@+id/button_speakpower"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:text="语言引擎（请选择讯飞）"
+        app:layout_constraintBottom_toTopOf="@+id/button_speak"
         app:layout_constraintEnd_toEndOf="@+id/button_speak"
-        app:layout_constraintStart_toStartOf="@+id/button_speak"
-        tools:layout_editor_absoluteY="565dp" />
+        app:layout_constraintStart_toStartOf="@+id/button_speak" />
 
 </android.support.constraint.ConstraintLayout>
