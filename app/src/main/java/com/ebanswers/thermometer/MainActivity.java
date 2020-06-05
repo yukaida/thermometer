@@ -195,10 +195,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_SpeakPower.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!getInstalledPackages()) {
-                    installApp();
-                    return;
-                }
+//                if (!getInstalledPackages()) {
+//                    installApp();
+//                    return;
+//                }
 
                 Intent intent = new Intent();
                 intent.setAction("com.android.settings.TTS_SETTINGS");
