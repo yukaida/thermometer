@@ -5,13 +5,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -32,8 +35,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.iflytek.cloud.SpeechConstant;
-import com.iflytek.cloud.SpeechUtility;
 import com.kongqw.serialportlibrary.Device;
 import com.kongqw.serialportlibrary.SerialPortFinder;
 import com.kongqw.serialportlibrary.SerialPortManager;
@@ -48,6 +49,8 @@ import com.yhao.floatwindow.ViewStateListener;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -55,8 +58,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import utils.DataConversion;
+import utils.FileProviderUtils;
 import utils.HexUtils;
-import utils.KqwSpeechSynthesizer;
 import utils.NumberToEnglishUtils;
 import utils.SPUtils;
 import utils.TxtUtils;
@@ -79,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     int authorization = 0;
     TextView tvTemp;//温度
 
-    KqwSpeechSynthesizer mKqwSpeechSynthesizer;//讯飞语音
     ConstraintLayout constraintLayout;
 
     MyRvAdapter myRvAdapter;
@@ -101,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     Button button_reset;
     Button button_lang;
     Button button_Start;
+    Button button_SpeakPower;
+
 
     EditText editText_portspeed;
     EditText editText_windowWidth;
@@ -159,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        Logger.d("启动次数"+createtime);
+        Logger.d("启动次数" + createtime);
         createtime++;
         super.onCreate(savedInstanceState);
         mTextToSpeech = getNewTextToSpeech();
@@ -167,7 +171,41 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         getAuthorization();//授权
 
+
+        //设置系统亮度
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.System.canWrite(this)) {
+                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + this.getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                this.startActivity(intent);
+            } else {
+                //有了权限，具体的动作
+//                Settings.System.putInt(getContentResolver(),
+//                        Settings.System.SCREEN_BRIGHTNESS, this);
+//                data2 = intToString(progress, 255);
+//                tvSunlightValue.setText(data2 + "%");
+            }
+        }
+
+
         sMainActivity = this;
+
+        button_SpeakPower = findViewById(R.id.button_speakpower);
+        button_SpeakPower.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!getInstalledPackages()) {
+                    installApp();
+                    return;
+                }
+
+                Intent intent = new Intent();
+                intent.setAction("com.android.settings.TTS_SETTINGS");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+        });
         //语音语言
         button_lang = findViewById(R.id.button_lang);
         button_lang.setOnClickListener(new View.OnClickListener() {
@@ -199,7 +237,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     timer.cancel();
                 }
                 mSerialPortManager.closeSerialPort();
-                mKqwSpeechSynthesizer.stop();
 
                 Toast.makeText(othercontext, "正在删除配置，请稍候", Toast.LENGTH_SHORT).show();
 
@@ -209,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         finish();
                         System.exit(0);
                     }
-                },2000);
+                }, 2000);
 
 
             }
@@ -260,6 +297,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_voice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if (voiceOpen) {
                     button_voice.setText("语音播报：关闭");
                 } else {
@@ -336,7 +374,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     timer.cancel();
                 }
                 mSerialPortManager.closeSerialPort();
-                mKqwSpeechSynthesizer.stop();
 
                 finish();
             }
@@ -348,7 +385,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         recyclerView.setAdapter(myRvAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
-        mKqwSpeechSynthesizer = new KqwSpeechSynthesizer(this);//语音引擎初始化
         //-----悬浮窗-----------------
         surfaceView = new SurfaceView(getApplicationContext());
         surfaceHolder = surfaceView.getHolder();
@@ -579,9 +615,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         handler.sendMessage(messagehide);//隐藏悬浮窗
 
 
-            Intent home = new Intent(Intent.ACTION_MAIN);
-            home.addCategory(Intent.CATEGORY_HOME);
-            startActivity(home);
+        Intent home = new Intent(Intent.ACTION_MAIN);
+        home.addCategory(Intent.CATEGORY_HOME);
+        startActivity(home);
+
+
+        if (((Boolean) SPUtils.get(this, "isFirst", true)) && !getInstalledPackages()) {
+            installApp();
+        }
 
     }
 
@@ -595,6 +636,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         return super.onKeyDown(keyCode, event);
     }
 
+    private boolean getInstalledPackages() {
+        List<PackageInfo> packages = getApplicationContext().getPackageManager().getInstalledPackages(0);
+        for (int i = 0; i < packages.size(); i++) {
+            PackageInfo packageInfo = packages.get(i);
+            if (packageInfo.packageName.equals("com.iflytek.tts")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -606,9 +658,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             timer.cancel();
         }
         mSerialPortManager.closeSerialPort();
-        mKqwSpeechSynthesizer.stop();
         FloatWindow.destroy("camera");
-        mKqwSpeechSynthesizer.stop();
     }
 
     //解析传入的16进制指令,返回温度,如 A0A10021081A01AA   33.8
@@ -723,10 +773,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                                 toastView.addView(tv);
                                 if (35 < temp && temp < tempNumber) {
                                     toastView.setBackground(getResources().getDrawable(R.drawable.toast_center_green));
-                                    tv.setText("正常体温： "+temp + "℃");
+                                    tv.setText("正常体温： " + temp + "℃");
                                 } else {
                                     toastView.setBackground(getResources().getDrawable(R.drawable.toast_center_red));
-                                    tv.setText("异常体温： "+temp + "℃");
+                                    tv.setText("异常体温： " + temp + "℃");
                                 }
 
                             }
@@ -739,20 +789,19 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tvTemp.setText("正常体温："+temp + "℃");
-                               tvTemp.setTextColor(getResources().getColor(R.color.greenyellow));
+                                tvTemp.setText("正常体温：" + temp + "℃");
+                                tvTemp.setTextColor(getResources().getColor(R.color.greenyellow));
                             }
                         });
-                    }else {
+                    } else {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tvTemp.setText("异常体温："+temp + "℃");
+                                tvTemp.setText("异常体温：" + temp + "℃");
                                 tvTemp.setTextColor(getResources().getColor(R.color.red));
                             }
                         });
                     }
-
 
 
                 } else {
@@ -935,16 +984,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             Log.d(TAG, "授权sp：" + e);
         }
 
-        try {
-            Context dsplayerAppContext = getApplicationContext().createPackageContext("com.dsplayer", Context.MODE_WORLD_WRITEABLE);
-            authorization = dsplayerAppContext.getSharedPreferences("ebanswers_preferences", Context.MODE_WORLD_WRITEABLE).getInt("PLAYER_ID", 0);
-            Log.d(TAG, "授权sp2: " + dsplayerAppContext.getSharedPreferences("ebanswers_preferences", Context.MODE_WORLD_WRITEABLE).getAll().toString());
-            Log.d(TAG, "授权sp2：" + authorization);
-
-        } catch (Exception e) {
-
-        }
-
 
         try {
 //                String content = TxtUtils.readFromXML("/storage/emulated/0/ebanswers/appconfig.js");
@@ -975,24 +1014,66 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     /**
      * 返回实例化的TTS对象
+     *
      * @return
      */
-    protected TextToSpeech getNewTextToSpeech(){
-        return new TextToSpeech(this,new TextToSpeech.OnInitListener(){
+    protected TextToSpeech getNewTextToSpeech() {
+        return new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
-            public void onInit(int status){
+            public void onInit(int status) {
                 // TODO Auto-generated method stub
-                if(status == TextToSpeech.SUCCESS){
+                if (status == TextToSpeech.SUCCESS) {
                     //设置朗读语言
                     int supported = mTextToSpeech.setLanguage(Locale.CHINESE);
-                    if((supported != TextToSpeech.LANG_AVAILABLE)&&(supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)){
-                        Toast.makeText(othercontext, "不支持当前语言", Toast.LENGTH_SHORT).show();
-                    }
+//                    if ((supported != TextToSpeech.LANG_AVAILABLE) && (supported != TextToSpeech.LANG_COUNTRY_AVAILABLE)) {
+//                        Toast.makeText(MainActivity.this, "不支持当前语言", Toast.LENGTH_SHORT).show();
+//                    }
                 }
             }
         });
     }
 
+
+
+
+    private void installApp(){
+
+
+        String type = "application/vnd.android.package-archive";
+        try {
+            //从assets读取文件流
+            InputStream is = getClass().getResourceAsStream(
+                    "/assets/tts_service_1.0.apk");
+            //将该文件流写入到本应用程序的私有数据区this.getFilesDir().getPath();
+            FileOutputStream fos = getApplicationContext().openFileOutput(
+                    "mptv.apk", Context.MODE_PRIVATE);
+            byte[] buffer = new byte[1024];
+            int len = 0;
+            while ((len = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, len);
+            }
+            fos.flush();
+            is.close();
+            fos.close();
+
+            File f = new File(getApplication().getFilesDir().getPath()
+                    + "/mptv.apk");
+            Log.d(TAG, "installApk29: " + f.getAbsolutePath());
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_VIEW);
+
+            FileProviderUtils.setIntentDataAndType(this, intent, type, f, true);
+
+
+            SPUtils.put(this, "isFirst", false);
+        } catch (Exception e) {
+            Log.d(TAG, "installApk29: "+e);
+            e.printStackTrace();
+        }
+
+
+
+    }
 
 }
 
