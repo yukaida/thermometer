@@ -176,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     String packageName = intent.getData().getSchemeSpecificPart();
 
                     if ("com.iflytek.speechcloud".equals(packageName)) {
+                        Log.d(TAG, "onReceive: 动态注册广播");
                         Intent intentTTS = new Intent();
                         intentTTS.setAction("com.android.settings.TTS_SETTINGS");
                         intentTTS.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -192,12 +193,30 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     };
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if ("com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
+        } else {
+            Log.d(TAG, "onResume: 重设语音引擎"+getNewTextToSpeech().getDefaultEngine());
+
+            if ("com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
+                mTextToSpeech = getNewTextToSpeech();
+            } else {
+                Toast.makeText(sMainActivity, "请选择“科大讯飞语音引擎3.0”", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         Logger.d("启动次数" + createtime);
         createtime++;
         super.onCreate(savedInstanceState);
         mTextToSpeech = getNewTextToSpeech();
+
+        Log.d(TAG, "onCreate: 语音引擎"+ mTextToSpeech.getDefaultEngine());
+
         setContentView(R.layout.activity_main);
 
         getAuthorization();//授权
@@ -329,7 +348,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_voice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if ("com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
 
+                } else {
+                    Toast.makeText(sMainActivity, "请选择“科大讯飞语音引擎3.0”", Toast.LENGTH_SHORT).show();
+                }
                 if (voiceOpen) {
                     button_voice.setText("语音播报：关闭");
                 } else {
@@ -672,7 +695,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         List<PackageInfo> packages = getApplicationContext().getPackageManager().getInstalledPackages(0);
         for (int i = 0; i < packages.size(); i++) {
             PackageInfo packageInfo = packages.get(i);
-            if (packageInfo.packageName.equals("com.iflytek.tts")) {
+            if (packageInfo.packageName.equals("com.iflytek.speechcloud")) {
                 return true;
             }
         }
@@ -1067,6 +1090,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
 
     private void installApp() {
+        Log.d(TAG, "installApp: 讯飞引擎安装");
 
 
         String type = "application/vnd.android.package-archive";

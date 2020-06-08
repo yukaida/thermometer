@@ -60,6 +60,7 @@ public final class FileProviderUtils {
                                             File file,
                                             boolean writeAble) {
         if (Build.VERSION.SDK_INT >= 24) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.setDataAndType(getUriForFile(context, file), type);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             context.startActivity(intent);
