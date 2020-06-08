@@ -195,11 +195,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     protected void onResume() {
         super.onResume();
+
+        mTextToSpeech = getNewTextToSpeech();
+
         if ("com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
         } else {
             Log.d(TAG, "onResume: 重设语音引擎"+getNewTextToSpeech().getDefaultEngine());
 
-            if ("com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
+            if (!"com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
                 mTextToSpeech = getNewTextToSpeech();
             } else {
                 Toast.makeText(sMainActivity, "请选择“科大讯飞语音引擎3.0”", Toast.LENGTH_SHORT).show();
@@ -261,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_lang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                installApp();
+
                 if ("语音语言：中文".equals(button_lang.getText().toString().trim())) {
                     button_lang.setText("语音语言：English");
                     lang = "en";
@@ -675,7 +678,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         startActivity(home);
 
 
-        if (((Boolean) SPUtils.get(this, "isFirst", true)) && !getInstalledPackages()) {
+        if (!getInstalledPackages()) {
             installApp();
         }
 
