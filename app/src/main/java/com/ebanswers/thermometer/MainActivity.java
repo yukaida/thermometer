@@ -1,7 +1,9 @@
 package com.ebanswers.thermometer;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -19,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -159,6 +162,31 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private SharedPreferences sp;
     boolean appIntsalled = false;
 
+    private BroadcastReceiver mInstallAppBroadcastReceiver =new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent !=null && TextUtils.equals(Intent.ACTION_PACKAGE_ADDED, intent.getAction())) {
+
+                if (intent.getData() !=null) {
+
+                    String packageName = intent.getData().getSchemeSpecificPart();
+
+                    if ("com.iflytek.speechcloud".equals(packageName)) {
+                        Intent intentTTS = new Intent();
+                        intentTTS.setAction("com.android.settings.TTS_SETTINGS");
+                        intentTTS.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intentTTS);
+                        Toast.makeText(context, "请选择“科大讯飞语言引擎3.0”", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+
+            }
+
+        }
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         getAuthorization();//授权
 
-
+        registerInstallAppBroadcastReceiver();
         //设置系统亮度
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(this)) {
@@ -1074,6 +1102,25 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
 
     }
+
+
+    private void registerInstallAppBroadcastReceiver() {
+
+        IntentFilter intentFilter =new IntentFilter();
+
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+
+        intentFilter.addDataScheme("package");
+
+        this.registerReceiver(mInstallAppBroadcastReceiver, intentFilter);
+
+    }
+
+
 
 }
 

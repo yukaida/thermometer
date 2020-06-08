@@ -40,10 +40,10 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo_sign"
         android:label="@string/app_name"
         android:name=".MyApplication"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo_sign"
         android:configChanges="keyboardHidden|orientation|screenSize|locale|screenLayout|mcc|mnc"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -66,15 +66,15 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="receiver.AppReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-                <category android:name="com.tmobile.intent.category.THEME_PACKAGE_INSTALL_STATE_CHANGE" />
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name="receiver.AppReceiver" >-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.PACKAGE_ADDED" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_REPLACED" />-->
+<!--                <action android:name="android.intent.action.PACKAGE_REMOVED" />-->
+<!--                <category android:name="com.tmobile.intent.category.THEME_PACKAGE_INSTALL_STATE_CHANGE" />-->
+<!--                <data android:scheme="package" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
         <provider
             android:name="android.support.v4.content.FileProvider"

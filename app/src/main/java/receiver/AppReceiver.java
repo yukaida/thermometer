@@ -13,7 +13,7 @@ public class AppReceiver extends BroadcastReceiver {
 		if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
             String packageName = intent.getData().getSchemeSpecificPart();
             System.out.println(packageName);
-            if(packageName.equals("com.iflytek.tts")){
+            if(packageName.equals("com.iflytek.speechcloud")){
             	gotoTTS(context);
             }
         }
