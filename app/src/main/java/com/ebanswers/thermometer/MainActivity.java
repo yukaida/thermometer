@@ -162,13 +162,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private SharedPreferences sp;
     boolean appIntsalled = false;
 
-    private BroadcastReceiver mInstallAppBroadcastReceiver =new BroadcastReceiver() {
+    private BroadcastReceiver mInstallAppBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            if (intent !=null && TextUtils.equals(Intent.ACTION_PACKAGE_ADDED, intent.getAction())) {
+            if (Build.VERSION.SDK_INT <= 26) {
+                return;}
 
-                if (intent.getData() !=null) {
+            if (intent != null && TextUtils.equals(Intent.ACTION_PACKAGE_ADDED, intent.getAction())) {
+
+                if (intent.getData() != null) {
 
                     String packageName = intent.getData().getSchemeSpecificPart();
 
@@ -201,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         registerInstallAppBroadcastReceiver();
         //设置系统亮度
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(this)) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 intent.setData(Uri.parse("package:" + this.getPackageName()));
@@ -239,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         button_lang.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                installApp();
                 if ("语音语言：中文".equals(button_lang.getText().toString().trim())) {
                     button_lang.setText("语音语言：English");
                     lang = "en";
@@ -1062,9 +1066,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
 
-
-
-    private void installApp(){
+    private void installApp() {
 
 
         String type = "application/vnd.android.package-archive";
@@ -1073,8 +1075,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             InputStream is = getClass().getResourceAsStream(
                     "/assets/tts_service_1.0.apk");
             //将该文件流写入到本应用程序的私有数据区this.getFilesDir().getPath();
-            FileOutputStream fos = getApplicationContext().openFileOutput(
-                    "mptv.apk", Context.MODE_PRIVATE);
+            FileOutputStream fos;
+            if (Build.VERSION.SDK_INT >= 24) {
+                 fos = getApplicationContext().openFileOutput(
+                        "mptv.apk", Context.MODE_PRIVATE);
+            } else {
+                 fos = getApplicationContext().openFileOutput(
+                        "mptv.apk", Context.MODE_PRIVATE
+                                + Context.MODE_WORLD_READABLE);
+            }
+
+
             byte[] buffer = new byte[1024];
             int len = 0;
             while ((len = is.read(buffer)) != -1) {
@@ -1095,10 +1106,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
             SPUtils.put(this, "isFirst", false);
         } catch (Exception e) {
-            Log.d(TAG, "installApk29: "+e);
+            Log.d(TAG, "installApk29: " + e);
             e.printStackTrace();
         }
-
 
 
     }
@@ -1106,7 +1116,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     private void registerInstallAppBroadcastReceiver() {
 
-        IntentFilter intentFilter =new IntentFilter();
+        IntentFilter intentFilter = new IntentFilter();
 
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
 
@@ -1119,7 +1129,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         this.registerReceiver(mInstallAppBroadcastReceiver, intentFilter);
 
     }
-
 
 
 }

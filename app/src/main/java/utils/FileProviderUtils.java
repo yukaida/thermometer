@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import java.io.File;
 
@@ -21,6 +22,7 @@ public final class FileProviderUtils {
      * @param file
      * @return
      */
+    private static final String TAG = "FileProviderUtils";
     public static Uri getUriForFile(Context context, File file) {
         Uri fileUri = null;
         if (Build.VERSION.SDK_INT >= 24) {
@@ -66,11 +68,11 @@ public final class FileProviderUtils {
                 context.startActivity(intent);
             }
         } else {
+            Log.d(TAG, "setIntentDataAndType: 低于7.0");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.setDataAndType(Uri.fromFile(file), type);
             context.startActivity(intent);
         }
-
 
     }
 }
