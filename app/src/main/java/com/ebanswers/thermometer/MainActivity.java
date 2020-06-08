@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         intentTTS.setAction("com.android.settings.TTS_SETTINGS");
                         intentTTS.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intentTTS);
-                        Toast.makeText(context, "请选择“科大讯飞语言引擎3.0”", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "请选择“科大讯飞语音引擎3.0”", Toast.LENGTH_LONG).show();
                     }
 
                 }

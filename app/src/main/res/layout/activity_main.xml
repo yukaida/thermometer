@@ -201,7 +201,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="语言引擎（请选择讯飞）"
+        android:text="语音引擎（请选择讯飞）"
         android:textColor="#D32F2F"
         app:layout_constraintBottom_toTopOf="@+id/button_speak"
         app:layout_constraintEnd_toEndOf="@+id/button_speak"
