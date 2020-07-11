@@ -284,12 +284,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             public void onClick(View v) {
                 FloatWindow.destroy("camera");
                 SPUtils.clear(MainActivity.this);
-                if (null != timerTask) {
-                    timerTask.cancel();
-                }
-                if (null != timer) {
-                    timer.cancel();
-                }
+//                if (null != timerTask) {
+//                    timerTask.cancel();
+//                }
+//                if (null != timer) {
+//                    timer.cancel();
+//                }
                 mSerialPortManager.closeSerialPort();
 
                 Toast.makeText(othercontext, "正在删除配置，请稍候", Toast.LENGTH_SHORT).show();
@@ -425,13 +425,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             @Override
             public void onClick(View v) {
                 FloatWindow.destroy("camera");
-                if (null != timerTask) {
-                    timerTask.cancel();
-                }
-                if (null != timer) {
-                    timer.cancel();
-                }
-                mSerialPortManager.closeSerialPort();
+//                if (null != timerTask) {
+//                    timerTask.cancel();
+//                }
+//                if (null != timer) {
+//                    timer.cancel();
+//                }
+//                mSerialPortManager.closeSerialPort();
 
                 finish();
             }
@@ -483,6 +483,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     SPUtils.put(MainActivity.this, "Baud", Baud);//波特率 默认9600
                     SPUtils.put(MainActivity.this, "SerialPort", SerialPort);//波特率 默认9600
                     SPUtils.put(MainActivity.this, "success", true);//是否成功运行过
+
+                    mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("D001800104DD"));
                 }
 
 
@@ -493,24 +495,24 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     readTemp = true;
                     button_Start.setText("停止读取温度");
                 }
-
-                if (readTemp) {
-                    timer = new Timer();
-                    timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
-                        }
-                    };
-                    timer.schedule(timerTask, 0, 1000);
-                } else {
-                    if (null != timerTask) {
-                        timerTask.cancel();
-                    }
-                    if (null != timer) {
-                        timer.cancel();
-                    }
-                }
+//todo  新模块取消
+//                if (readTemp) {
+//                    timer = new Timer();
+//                    timerTask = new TimerTask() {
+//                        @Override
+//                        public void run() {
+//                            boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
+//                        }
+//                    };
+//                    timer.schedule(timerTask, 0, 1000);
+//                } else {
+//                    if (null != timerTask) {
+//                        timerTask.cancel();
+//                    }
+//                    if (null != timer) {
+//                        timer.cancel();
+//                    }
+//                }
             }
         });
 //---------------------------------------------------------------
@@ -535,8 +537,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             public void onDataReceived(byte[] bytes) {
                 String dataReceived = DataConversion.encodeHexString(bytes);
                 Log.d(TAG, "onDataReceived: " + dataReceived);
-                double temp = getTempWithHex(dataReceived);
-                analysisTemp(temp);
+                double temp = getTempWithHexNew(dataReceived);
+
+                if (readTemp) {
+                    analysisTemp(temp);
+                }
+
                 Log.d(TAG, "temperature: " + temp);
             }
 
@@ -619,6 +625,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 SPUtils.put(MainActivity.this, "Baud", Baud);//波特率 默认9600
                 SPUtils.put(MainActivity.this, "SerialPort", SerialPort);//波特率 默认9600
                 SPUtils.put(MainActivity.this, "success", true);//是否成功运行过
+
+                mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("D001800104DD"));
+
+
                 if (readTemp) {
                     readTemp = false;
                     button_Start.setText("继续");
@@ -627,23 +637,23 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     button_Start.setText("停止读取温度");
                 }
 
-                if (readTemp) {
-                    timer = new Timer();
-                    timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
-                        }
-                    };
-                    timer.schedule(timerTask, 0, 1000);
-                } else {
-                    if (null != timerTask) {
-                        timerTask.cancel();
-                    }
-                    if (null != timer) {
-                        timer.cancel();
-                    }
-                }
+//                if (readTemp) {
+//                    timer = new Timer();
+//                    timerTask = new TimerTask() {
+//                        @Override
+//                        public void run() {
+//                            boolean sendBytes = mSerialPortManager.sendBytes(HexUtils.Hex2Bytes("A0A1AA"));
+//                        }
+//                    };
+//                    timer.schedule(timerTask, 0, 1000);
+//                } else {
+//                    if (null != timerTask) {
+//                        timerTask.cancel();
+//                    }
+//                    if (null != timer) {
+//                        timer.cancel();
+//                    }
+//                }
             }
         }
 
@@ -709,12 +719,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     protected void onDestroy() {
         super.onDestroy();
 
-        if (null != timerTask) {
-            timerTask.cancel();
-        }
-        if (null != timer) {
-            timer.cancel();
-        }
+//        if (null != timerTask) {
+//            timerTask.cancel();
+//        }
+//        if (null != timer) {
+//            timer.cancel();
+//        }
         mSerialPortManager.closeSerialPort();
         FloatWindow.destroy("camera");
     }
@@ -741,6 +751,41 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         }
         return 100;
     }
+
+    //解析传入的16进制指令,返回温度,如 AA 55 3F 81 BE 55 AA   33.8
+    private double getTempWithHexNew(String hexString) {
+        try {
+            if (hexString.length() == 14) {
+                String plus_minus = hexString.substring(4, 6);
+//                String integer = hexString.substring(6, 8);
+//                String decimal = hexString.substring(8, 10);
+//                Log.d(TAG, "getTempWithHex: plus_minus:" + plus_minus + "\n"
+//                        + "integer:" + integer + "\n"
+//                        + "decimal:"
+////                        + decimal
+//                );
+                String toChange = "01" + plus_minus;
+                Log.d(TAG, "getTempWithHexNew:  四位温度指令" + toChange);
+                double x = 10.00;
+                double intergerDouble = DataConversion.hexToDec(toChange)/x;
+//                Log.d(TAG, "getTempWithHexNew: 高位" + intergerDouble);
+//
+//                double lowDouble = DataConversion.hexToDec(plus_minus);
+//                Log.d(TAG, "getTempWithHexNew: 低位" + lowDouble);
+////                double decimalLong = DataConversion.hexToDec(decimal);
+////                double decimalDouble = decimalLong / 10;
+//                double temp = intergerDouble + lowDouble;
+//                Log.d(TAG, "getTempWithHexNew: "+temp);
+                return intergerDouble;
+            }
+        } catch (Exception e) {
+            return 100;
+        }
+        return 100;
+    }
+
+
+
 
     @Override
     protected void onPostResume() {
