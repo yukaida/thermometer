@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         intentTTS.setAction("com.android.settings.TTS_SETTINGS");
                         intentTTS.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intentTTS);
-                        Toast.makeText(context, "请选择“科大讯飞语音引擎3.0”", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context,  R.string.choose_xunfei, Toast.LENGTH_LONG).show();
                     }
 
                 }
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             if (!"com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
                 mTextToSpeech = getNewTextToSpeech();
             } else {
-                Toast.makeText(sMainActivity, "请选择“科大讯飞语音引擎3.0”", Toast.LENGTH_SHORT).show();
+                Toast.makeText(sMainActivity, R.string.choose_xunfei, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -265,12 +265,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             @Override
             public void onClick(View v) {
 
-                if ("语音语言：中文".equals(button_lang.getText().toString().trim())) {
-                    button_lang.setText("语音语言：English");
+                if (getString(R.string.language_chinese).equals(button_lang.getText().toString().trim())) {
+                    button_lang.setText(R.string.language_english);
                     lang = "en";
                     SPUtils.put(MainActivity.this, "language", "en");//语言
                 } else {
-                    button_lang.setText("语音语言：中文");
+                    button_lang.setText(R.string.language_chinese);
                     lang = "zh";
                     SPUtils.put(MainActivity.this, "language", "zh");//语言
                 }
@@ -292,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 }
                 mSerialPortManager.closeSerialPort();
 
-                Toast.makeText(othercontext, "正在删除配置，请稍候", Toast.LENGTH_SHORT).show();
+                Toast.makeText(othercontext, R.string.delete_config, Toast.LENGTH_SHORT).show();
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -322,9 +322,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             public void onClick(View v) {
 
                 if (cameraOpen) {
-                    button_camera.setText("摄像头：关闭");
+                    button_camera.setText(R.string.camera_close);
                 } else {
-                    button_camera.setText("摄像头：开启");
+                    button_camera.setText(R.string.camera_open);
                 }
                 cameraOpen = cameraOpen ? false : true;
                 SPUtils.put(MainActivity.this, "camera", cameraOpen);//摄像头
@@ -337,9 +337,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             @Override
             public void onClick(View v) {
                 if (temperatureShow) {
-                    button_temp.setText("温度：隐藏");
+                    button_temp.setText(R.string.tp_unshow);
                 } else {
-                    button_temp.setText("温度：显示");
+                    button_temp.setText(R.string.tp_show);
                 }
                 temperatureShow = temperatureShow ? false : true;
                 SPUtils.put(MainActivity.this, "temperature", temperatureShow);//温度
@@ -354,12 +354,12 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 if ("com.iflytek.speechcloud".equals(mTextToSpeech.getDefaultEngine())) {
 
                 } else {
-                    Toast.makeText(sMainActivity, "请选择“科大讯飞语音引擎3.0”", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(sMainActivity,  R.string.choose_xunfei, Toast.LENGTH_SHORT).show();
                 }
                 if (voiceOpen) {
-                    button_voice.setText("语音播报：关闭");
+                    button_voice.setText(R.string.speak_close);
                 } else {
-                    button_voice.setText("语音播报：开启");
+                    button_voice.setText(R.string.speak_open);
                 }
                 voiceOpen = voiceOpen ? false : true;
                 SPUtils.put(MainActivity.this, "voice", voiceOpen);//语音
@@ -380,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     if (!editText_windowHeight.getText().toString().isEmpty()) {
                         windowHeight = Integer.valueOf(editText_windowHeight.getText().toString().trim());
                         SPUtils.put(MainActivity.this, "windowHeight", windowHeight);//悬浮窗宽 默认400
-                        Toast.makeText(MainActivity.this, "保存成功,请点击“退出应用”,并重启应用", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.save_and_restart, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -468,7 +468,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //        参数1：串口
 //        参数2：波特率
 //        返回：串口打开是否成功
-                if (button_Start.getText().equals("开始读取温度")) {
+                if (button_Start.getText().equals(getString(R.string.start_read))) {
                     if (!editText_portspeed.getText().toString().trim().isEmpty()) {
                         Baud = Integer.valueOf(editText_portspeed.getText().toString().trim());
                     }
@@ -476,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     boolean openSerialPort = mSerialPortManager.openSerialPort(devices.get(position).getFile(), Baud);
                     Log.d(TAG, "onCreate: SerialPort open :--" + SerialPort + "--succeed ? " + openSerialPort);
                     if (!openSerialPort) {
-                        Toast.makeText(MainActivity.this, "串口打开失败,请切换串口,波特率或检查设备", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.failed_port_check, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     Toast.makeText(MainActivity.this, "打开成功,开始读取温度,串口" + SerialPort + "波特率" + Baud, Toast.LENGTH_SHORT).show();
@@ -488,10 +488,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
                 if (readTemp) {
                     readTemp = false;
-                    button_Start.setText("继续");
+                    button_Start.setText(R.string.continuing);
                 } else {
                     readTemp = true;
-                    button_Start.setText("停止读取温度");
+                    button_Start.setText(R.string.stop_read);
                 }
 
                 if (readTemp) {
@@ -577,9 +577,9 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             cameraOpen = (Boolean) SPUtils.get(this, "camera", true);
             temperatureShow = (Boolean) SPUtils.get(this, "temperature", true);
             voiceOpen = (Boolean) SPUtils.get(this, "voice", true);
-            button_camera.setText(cameraOpen ? "摄像头：开启" : "摄像头：关闭");
-            button_temp.setText(temperatureShow ? "温度：显示" : "温度：隐藏");
-            button_voice.setText(voiceOpen ? "语音播报：开启" : "语音播报：关闭");
+            button_camera.setText(cameraOpen ? R.string.camera_open : R.string.camera_close);
+            button_temp.setText(temperatureShow ? getString(R.string.tp_show) : getString(R.string.tp_unshow));
+            button_voice.setText(voiceOpen ? R.string.speak_open : R.string.speak_close);
 
             lang = (String) SPUtils.get(this, "language", "zh");
             if (!"zh".equals(lang)) {
@@ -603,7 +603,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     + "语音播报" + voiceOpen + "\n"
                     + "悬浮窗宽：" + windowWidth + "_高:" + windowHeight + "_X：" + windowX + "_Y" + windowY);
 
-            if (button_Start.getText().equals("开始读取温度")) {
+            if (button_Start.getText().equals(R.string.start_read)) {
 //                if (!editText_portspeed.getText().toString().trim().isEmpty()) {
 //                    Baud = Integer.valueOf(editText_portspeed.getText().toString().trim());
 //                }
@@ -615,16 +615,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                     SPUtils.put(MainActivity.this, "success", false);//是否成功运行过
                     return;
                 }
-                Toast.makeText(MainActivity.this, "打开成功,开始读取温度,串口" + SerialPort + "波特率" + Baud, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, getString(R.string.open_success_readtp) + SerialPort + getString(R.string.baudrate) + Baud, Toast.LENGTH_SHORT).show();
                 SPUtils.put(MainActivity.this, "Baud", Baud);//波特率 默认9600
                 SPUtils.put(MainActivity.this, "SerialPort", SerialPort);//波特率 默认9600
                 SPUtils.put(MainActivity.this, "success", true);//是否成功运行过
                 if (readTemp) {
                     readTemp = false;
-                    button_Start.setText("继续");
+                    button_Start.setText(R.string.continuing);
                 } else {
                     readTemp = true;
-                    button_Start.setText("停止读取温度");
+                    button_Start.setText(R.string.stop_read);
                 }
 
                 if (readTemp) {
@@ -762,7 +762,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(sMainActivity, "未授权！请注册播放端后重启系统。", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(sMainActivity, R.string.unauth_register, Toast.LENGTH_SHORT).show();
                 }
             });
         } else if (35 < temp && temp < 40) {
@@ -831,10 +831,10 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                                 toastView.addView(tv);
                                 if (35 < temp && temp < tempNumber) {
                                     toastView.setBackground(getResources().getDrawable(R.drawable.toast_center_green));
-                                    tv.setText("正常体温： " + temp + "℃");
+                                    tv.setText(getString(R.string.normal_tp) + temp + "℃");
                                 } else {
                                     toastView.setBackground(getResources().getDrawable(R.drawable.toast_center_red));
-                                    tv.setText("异常体温： " + temp + "℃");
+                                    tv.setText(getString(R.string.abnormal_tp) + temp + "℃");
                                 }
 
                             }
@@ -847,7 +847,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tvTemp.setText("正常体温：" + temp + "℃");
+                                tvTemp.setText(getString(R.string.normal_tp) + temp + "℃");
                                 tvTemp.setTextColor(getResources().getColor(R.color.greenyellow));
                             }
                         });
@@ -855,7 +855,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tvTemp.setText("异常体温：" + temp + "℃");
+                                tvTemp.setText(getString(R.string.abnormal_tp) + temp + "℃");
                                 tvTemp.setTextColor(getResources().getColor(R.color.red));
                             }
                         });
@@ -957,7 +957,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             camera.startPreview();
         } catch (Exception e) {
             Logger.e("摄像头", e);
-            Toast.makeText(sMainActivity, "请检查摄像头设备", Toast.LENGTH_SHORT).show();
+            Toast.makeText(sMainActivity, R.string.check_camera, Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -973,7 +973,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 camera = null;
             }
             e.printStackTrace();
-            Toast.makeText(MainActivity.this, "启动摄像头失败,请检查设备或开启摄像头权限", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, R.string.camera_unwork_check, Toast.LENGTH_SHORT).show();
 //            if (null != timerTask) {
 //                timerTask.cancel();
 //            }

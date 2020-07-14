@@ -1,0 +1,66 @@
+<resources>
+    <string name="app_name">thermometer</string>
+    <string name="choose_xunfei">pls choose Xunfei voice engine3.0</string>
+    <string name="delete_config">Please wait, deleting your configuration
+</string>
+    <string name="save_and_restart">Save successfully, please click "Exit Application" and restart the application
+</string>
+    <string name="failed_port_check">Failed to open the serial port, please switch the serial port, baud rate or check the device
+</string>
+    <string name="open_success_readtp">Open successfully, starting to read temperature
+</string>
+    <string name="baudrate">baudrate</string>
+    <string name="unauth_register">Unauthorized! Please register the player and restart the system
+</string>
+    <string name="normal_tp">Normal body temperature
+</string>
+    <string name="abnormal_tp">Abnormal body temperature
+</string>
+    <string name="check_camera">Please check the camera device
+</string>
+    <string name="camera_unwork_check">Failed to run the camera, please check the device or open the camera permissions
+</string>
+    <string name="start_read">Start to read temperature
+</string>
+    <string name="stop_read">Stop to read temperature
+</string>
+    <string name="continuing">Continuing
+</string>
+    <string name="camera_open">Camera: on
+</string>
+    <string name="camera_close">Camera: off
+</string>
+    <string name="tp_show">Temperature:play
+</string>
+    <string name="tp_unshow">Temperature:display
+</string>
+    <string name="speak_open">Voice broadcast: open
+</string>
+    <string name="speak_close">Voice broadcast: close
+</string>
+    <string name="language_chinese">Voice Language: Chinese
+</string>
+    <string name="language_english">Voice Language: English
+</string>
+    <string name="fw_width">Floating window width: default 300
+</string>
+    <string name="fw_height">Height:default 300
+</string>
+    <string name="save_restart">Save (takes effect after restart application )
+</string>
+    <string name="voice_engine">Voice engine (please choose Xunfei)
+</string>
+    <string name="baudrate_9600">baudrate:default 9600</string>
+    <string name="outside_hint">If the floating window is not displayed after adjusting the position, the position is outside the screen, please reset
+</string>
+    <string name="reset_and_exit">Reset all and exit
+</string>
+    <string name="choose_xunfei_ui">Voice engine (please choose Xunfei)
+</string>
+    <string name="save_restart_useful">Save (takes effect after restart application )
+</string>
+    <string name="exit_app">Quit the application
+</string>
+    <string name="reset_fw_side">Reset floating window position
+</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colortemp">#C2185B</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <color name="white">#ffffff</color>
+
+    <color name="tomato">#ff6347</color> <!-- 西红柿色 -->
+    <color name="red">#ff0000</color> <!-- 红色 -->
+    <color name="powderblue">#b0e0e6</color> <!-- 粉蓝色 -->
+    <color name="lightsteelblue">#b0c4de</color> <!-- 亮钢兰色 -->
+    <color name="paleturquoise">#afeeee</color> <!-- 苍宝石绿 -->
+    <color name="greenyellow">#adff2f</color> <!-- 黄绿色 -->
+    <color name="lightblue">#add8e6</color> <!-- 亮蓝色 -->
+
+    <color name="darkorchid">#9932cc</color> <!-- 暗紫色 -->
+    <color name="palegreen">#98fb98</color> <!-- 苍绿色 -->
+    <color name="darkviolet">#9400d3</color> <!-- 暗紫罗兰色 -->
+    <color name="mediumpurple">#9370db</color> <!-- 中紫色 -->
+    <color name="lightgreen">#90ee90</color> <!-- 亮绿色 -->
+</resources>

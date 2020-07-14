@@ -1,3 +1,36 @@
 <resources>
     <string name="app_name">thermometer</string>
+    <string name="choose_xunfei">请选择“科大讯飞语音引擎3.0”</string>
+    <string name="delete_config">正在删除配置，请稍候</string>
+    <string name="save_and_restart">保存成功,请点击“退出应用”,并重启应用</string>
+    <string name="failed_port_check">串口打开失败,请切换串口,波特率或检查设备</string>
+    <string name="open_success_readtp">打开成功,开始读取温度,串口</string>
+    <string name="baudrate">波特率</string>
+    <string name="unauth_register">未授权！请注册播放端后重启系统。</string>
+    <string name="normal_tp">正常体温：</string>
+    <string name="abnormal_tp">异常体温："</string>
+    <string name="check_camera">请检查摄像头设备</string>
+    <string name="camera_unwork_check">启动摄像头失败,请检查设备或开启摄像头权限</string>
+    <string name="start_read">开始读取温度</string>
+    <string name="stop_read">停止读取温度</string>
+    <string name="continuing">继续</string>
+    <string name="camera_open">摄像头：开启</string>
+    <string name="camera_close">摄像头：关闭</string>
+    <string name="tp_show">温度：显示</string>
+    <string name="tp_unshow">温度：隐藏</string>
+    <string name="speak_open">语音播报：开启</string>
+    <string name="speak_close">语音播报：关闭</string>
+    <string name="language_chinese">语音语言：中文</string>
+    <string name="language_english">语音语言：English</string>
+    <string name="fw_width">悬浮窗宽：默认300</string>
+    <string name="fw_height">高：默认300</string>
+    <string name="save_restart">保存（重启应用生效）</string>
+    <string name="voice_engine">语音引擎（请选择讯飞）</string>
+    <string name="baudrate_9600">波特率：默认9600</string>
+    <string name="outside_hint">若调整位置后悬浮窗不显示，则位置位于屏幕外，请重置</string>
+    <string name="reset_and_exit">重置全部并退出</string>
+    <string name="choose_xunfei_ui">语音引擎（请选择讯飞）</string>
+    <string name="save_restart_useful">保存(重启应用生效)</string>
+    <string name="exit_app">退出应用</string>
+    <string name="reset_fw_side">重置悬浮窗位置</string>
 </resources>
